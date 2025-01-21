@@ -1,1 +1,1 @@
-# pregna-care-server-nestjs
+Project name: Pregnancy Growth Tracking System - PregnaCare
