@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,6 +26,16 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(port || 8080);
+  //ConfigSwagger
+  const config = new DocumentBuilder()
+    .setTitle('PregnaCare')
+    .setDescription('API documentation for PregnaCare application')
+    .setVersion('v1')
+    .addBearerAuth()
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/v1', app, documentFactory);
+
+  await app.listen(port ?? 8080);
 }
 bootstrap();
