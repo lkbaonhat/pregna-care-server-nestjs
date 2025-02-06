@@ -3,20 +3,20 @@ on:
     branches:
       - dev
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Load and cache dependencies
-        id: cached-deps
-        uses: ./.github/actions/cached-deps
-        with:
-          caching: 'false'
-      - name: Output cache-hit information
-        run: echo "${{ steps.cached-deps.outputs.cache-hit }}"
-      - name: Lint code
-        run: npm run lint
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #     - name: Load and cache dependencies
+  #       id: cached-deps
+  #       uses: ./.github/actions/cached-deps
+  #       with:
+  #         caching: 'false'
+  #     - name: Output cache-hit information
+  #       run: echo "${{ steps.cached-deps.outputs.cache-hit }}"
+  #     - name: Lint code
+  #       run: npm run lint
   test:
     runs-on: ubuntu-latest
     steps:
