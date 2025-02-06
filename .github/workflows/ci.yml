@@ -37,7 +37,7 @@ jobs:
           dest: coverage.zip
       - name: Upload test report
         if: failure() && steps.run-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-report
           path: coverage.zip
