@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Confirmation</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(90deg, #ee7a7a 0%, #acbcf7 100%);
+      }
+      .content {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333333;
+        margin-top: 0;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #4a90e2;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      @media only screen and (max-width: 600px) {
+        .container {
+          width: 100% !important;
+        }
+        .content {
+          padding: 20px !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="content">
+        <h1>Confirm Your Email</h1>
+        <p>Hello <%= name %>,</p>
+        <p>
+          Thank you for signing up! Please confirm your email address by
+          clicking the button below:
+        </p>
+        <p style="text-align: center">
+          <a href="<%= confirmationLink %>" class="button">Confirm Email</a>
+        </p>
+        <p>
+          If you didn't create an account with us, please ignore this email.
+        </p>
+        <p>Best regards,<br />The SWD Team</p>
+      </div>
+    </div>
+  </body>
+</html>

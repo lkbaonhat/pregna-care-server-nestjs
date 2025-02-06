@@ -1,0 +1,29 @@
+name: Get & cache dependencies
+description: Get dependencies (via npm) and cache them for future runs
+inputs:
+  caching:
+    description: 'The caching strategy to use'
+    required: false
+    default: 'true'
+outputs:
+  cache-hit:
+    description: 'Whether the cache was hit'
+    value: ${{ steps.cache-outputs.outputs.cache-hit }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache dependencies
+      if: inputs.caching == 'true'
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true' || inputs.caching != 'true'
+      run: npm ci
+      shell: bash
+    - name: Set cache-hit output
+      id: cache-outputs
+      run: echo "cache-hit=${{ steps.cache.outputs.cache-hit }}" >> $GITHUB_OUTPUT
+      shell: bash
