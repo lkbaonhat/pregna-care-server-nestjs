@@ -13,11 +13,6 @@ export class UsersService {
     return user.save();
   }
 
-  createWithToken(email: string, password: string, confirmationToken: string) {
-    const user = new this.userModel({ email, password, confirmationToken });
-    return user.save();
-  }
-
   findById(id: string) {
     return this.userModel.findById(id);
   }

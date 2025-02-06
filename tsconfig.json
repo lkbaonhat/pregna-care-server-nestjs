@@ -18,6 +18,5 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "allowJs": true
-  },
-  "include": [".eslintrc.js", "src/**/*.ts"]
+  }
 }

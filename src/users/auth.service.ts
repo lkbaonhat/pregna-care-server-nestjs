@@ -14,11 +14,11 @@ export class AuthService {
     private mailService: EmailsService,
   ) {}
 
-  sendValidationEmail(id: string, email: string) {
+  async sendValidationEmail(id: string, email: string) {
     const token = this.jwtService.sign({ email, sub: id });
     const url = `${process.env.FRONTEND_URL}/users/validate?token=${token}`;
 
-    this.mailService.sendMail(
+    await this.mailService.sendMail(
       email,
       'Please confirm your email',
       'validation-email.ejs',
@@ -30,7 +30,12 @@ export class AuthService {
     // Check email in use
     const existedUser = await this.userService.findByEmail(email);
     if (existedUser) {
-      throw new BadRequestException('Email is already in use when sign up');
+      if (existedUser.status === UserStatus.Registered) {
+        throw new BadRequestException(
+          'User already registered, please validate email',
+        );
+      }
+      throw new BadRequestException('Email is already in use');
     }
 
     // Create user
@@ -38,9 +43,9 @@ export class AuthService {
     await user.save();
 
     // Send validation email
-    this.sendValidationEmail(user._id.toString(), email);
+    await this.sendValidationEmail(user._id.toString(), email);
 
-    // TODO: Send response
+    return { id: user._id.toString(), email: user.email };
   }
 
   async validateUser(token: string) {
