@@ -1,10 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { UsersService } from './users.service';
-import { ConfirmToken } from './types/confirm-token';
 import { UserStatus } from './types/user-status';
 import { EmailsService } from 'src/emails/emails.service';
+import { comparePasswordHelper } from 'src/utils/helper';
 
 @Injectable()
 export class AuthService {
@@ -48,27 +52,22 @@ export class AuthService {
     return { id: user._id.toString(), email: user.email };
   }
 
-  async validateUser(token: string) {
-    // check if the token is valid
-
-    const decoded = this.jwtService.decode<ConfirmToken>(token);
-
-    const user = await this.userService.findById(decoded.sub);
+  async validateUser(email: string, password: string) {
+    const user = await this.userService.findByEmail(email);
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new UnauthorizedException('User not found');
     }
 
-    if (user.email !== decoded.email) {
-      throw new BadRequestException('Invalid token');
+    const isValid = await comparePasswordHelper(password, user.password);
+
+    if (!isValid) {
+      throw new BadRequestException('Invalid password');
     }
 
-    if (user.status === UserStatus.Active) {
-      throw new BadRequestException('User already validated');
+    if (user.status !== UserStatus.Active) {
+      throw new BadRequestException('User is not active');
     }
 
-    user.status = UserStatus.Active;
-    await user.save();
-
-    // TODO: Send response
+    return this.jwtService.sign({ email, sub: user._id });
   }
 }

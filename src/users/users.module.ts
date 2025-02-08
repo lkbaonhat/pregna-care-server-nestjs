@@ -1,16 +1,19 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { User, UserSchema } from './user.schema';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { AuthService } from './auth.service';
 import { EmailsModule } from 'src/emails/emails.module';
+import { LocalStrategy } from 'src/users/strategies/local.strategy';
 
 @Module({
   imports: [
+    PassportModule,
     MongooseModule.forFeature([
       {
         name: User.name,
@@ -30,6 +33,6 @@ import { EmailsModule } from 'src/emails/emails.module';
     EmailsModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthService],
+  providers: [UsersService, AuthService, LocalStrategy],
 })
 export class UsersModule {}
