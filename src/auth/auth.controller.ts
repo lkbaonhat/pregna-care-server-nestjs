@@ -8,6 +8,7 @@ import { LocalGuard } from 'src/guards/local.guard';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { Response } from 'src/types/core';
 import { Public } from 'src/constants/core';
+import { ConfirmEmailDto } from './dtos/confirm-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +20,16 @@ export class AuthController {
     const user = await this.authService.signUp(body.email, body.password);
     return { data: user, message: 'User created' };
   }
+
+  @Post('confirm-email')
+  @Public()
+  async confirmEmail(@Body() body: ConfirmEmailDto): Promise<Response> {
+    const email = this.authService.decodeConfirmationToken(body.token);
+    const result = await this.authService.validateEmail(email);
+    return { data: result, message: 'Email confirmed' };
+  }
+
+  // TODO: Implement resend email confirmation
 
   @Post('signin')
   @Public()

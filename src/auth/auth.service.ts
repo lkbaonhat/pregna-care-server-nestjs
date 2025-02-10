@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -11,18 +12,27 @@ import { UsersService } from 'src/users/users.service';
 import { comparePasswordHelper } from 'src/utils/helper';
 import { UserStatus } from 'src/users/types/user-status';
 import { UserDocument } from 'src/users/user.schema';
+import { ConfigService } from '@nestjs/config';
+import { ConfirmToken } from 'src/users/types/confirm-token';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(ConfigService) private configService: ConfigService,
     private userService: UsersService,
     private jwtService: JwtService,
     private mailService: EmailsService,
   ) {}
 
   async sendValidationEmail(id: string, email: string) {
-    const token = this.jwtService.sign({ email, sub: id });
-    const url = `${process.env.FRONTEND_URL}/users/validate?token=${token}`;
+    const token = this.jwtService.sign(
+      { email, sub: id },
+      {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+        expiresIn: '1h',
+      },
+    );
+    const url = `${this.configService.get('EMAIL_CONFIRMATION_URL')}/users/validate-email?token=${token}`;
 
     await this.mailService.sendMail(
       email,
@@ -60,6 +70,14 @@ export class AuthService {
     };
   }
 
+  signin(user: Partial<UserDocument>) {
+    const payload = { email: user.email, sub: user._id };
+    return {
+      accessToken: this.jwtService.sign(payload),
+      userId: user._id,
+    };
+  }
+
   async validateUser(email: string, password: string) {
     const user = await this.userService.findByEmail(email);
     if (!user) {
@@ -79,11 +97,49 @@ export class AuthService {
     return user;
   }
 
-  signin(user: Partial<UserDocument>) {
-    const payload = { email: user.email, sub: user._id };
-    return {
-      accessToken: this.jwtService.sign(payload),
-      userId: user._id,
-    };
+  async validateUserById(id: string) {
+    const user = await this.userService.findById(id);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (user.status !== UserStatus.Active) {
+      throw new UnauthorizedException('User is not active');
+    }
+
+    return user;
+  }
+
+  async validateEmail(email: string) {
+    const user = await this.userService.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    user.status = UserStatus.Active;
+    await user.save();
+
+    // Send a JWT token for the user to immediately sign in
+    return this.signin(user);
+  }
+
+  decodeConfirmationToken(token: string) {
+    try {
+      const payload = this.jwtService.verify<ConfirmToken>(token, {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+      });
+
+      if (typeof payload === 'object' && 'email' in payload) {
+        return payload.email;
+      }
+      throw new BadRequestException();
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (error?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Email confirmation token expired');
+      }
+      throw new BadRequestException('Bad confirmation token');
+    }
   }
 }

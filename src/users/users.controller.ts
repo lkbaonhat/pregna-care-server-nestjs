@@ -1,10 +1,11 @@
-import { Controller, Delete, Get, Param, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, Req } from '@nestjs/common';
 
 import { UsersService } from './users.service';
 
 import { ParseMongoIdPipe } from 'src/pipes/parse-mongo-id.pipe';
 import { Response } from 'src/types/core';
 import { Request } from 'express';
+import { User } from './user.schema';
 
 @Controller('users')
 export class UsersController {
@@ -18,6 +19,16 @@ export class UsersController {
   @Get(':id')
   async getUser(@Param('id', ParseMongoIdPipe) id: string): Promise<Response> {
     const result = await this.usersService.findById(id);
+    return { data: result };
+  }
+
+  // TODO: Add another route to update only password
+  @Put(':id')
+  async updateUser(
+    @Param('id', ParseMongoIdPipe) id: string,
+    @Body() body: Partial<User>,
+  ): Promise<Response> {
+    const result = await this.usersService.update(id, body);
     return { data: result };
   }
 
