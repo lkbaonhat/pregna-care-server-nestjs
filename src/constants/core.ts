@@ -1,3 +1,7 @@
-const EMPTY_STRING = '';
+import { SetMetadata } from '@nestjs/common';
 
-export { EMPTY_STRING };
+const EMPTY_STRING = '';
+const IS_PUBLIC_KEY = 'isPublic';
+const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
+
+export { EMPTY_STRING, IS_PUBLIC_KEY, Public };

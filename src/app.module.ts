@@ -1,15 +1,13 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
 import { UsersModule } from './users/users.module';
-
-const cookieSession = require('cookie-session');
+import { AuthModule } from './auth/auth.module';
+import { JwtGuard } from './guards/jwt.guard';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -30,21 +28,18 @@ const cookieSession = require('cookie-session');
       },
     ]),
     UsersModule,
+    AuthModule,
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: JwtGuard,
+    },
+    JwtStrategy,
   ],
 })
-export class AppModule {
-  constructor(private configService: ConfigService) {}
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(cookieSession({ keys: [this.configService.get('COOKIE_KEY')] }))
-      .forRoutes('*');
-  }
-}
+export class AppModule {}

@@ -5,10 +5,12 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { UsersService } from './users.service';
-import { UserStatus } from './types/user-status';
 import { EmailsService } from 'src/emails/emails.service';
+import { UsersService } from 'src/users/users.service';
+
 import { comparePasswordHelper } from 'src/utils/helper';
+import { UserStatus } from 'src/users/types/user-status';
+import { UserDocument } from 'src/users/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +30,8 @@ export class AuthService {
       'validation-email.ejs',
       { name: email, confirmationLink: url },
     );
+
+    return token;
   }
 
   async signUp(email: string, password: string) {
@@ -47,9 +51,13 @@ export class AuthService {
     await user.save();
 
     // Send validation email
-    await this.sendValidationEmail(user._id.toString(), email);
+    const token = await this.sendValidationEmail(user._id.toString(), email);
 
-    return { id: user._id.toString(), email: user.email };
+    return {
+      id: user._id.toString(),
+      email: user.email,
+      confirmationToken: token,
+    };
   }
 
   async validateUser(email: string, password: string) {
@@ -61,13 +69,21 @@ export class AuthService {
     const isValid = await comparePasswordHelper(password, user.password);
 
     if (!isValid) {
-      throw new BadRequestException('Invalid password');
+      throw new UnauthorizedException('Invalid password');
     }
 
     if (user.status !== UserStatus.Active) {
-      throw new BadRequestException('User is not active');
+      throw new UnauthorizedException('User is not active');
     }
 
-    return this.jwtService.sign({ email, sub: user._id });
+    return user;
+  }
+
+  signin(user: Partial<UserDocument>) {
+    const payload = { email: user.email, sub: user._id };
+    return {
+      accessToken: this.jwtService.sign(payload),
+      userId: user._id,
+    };
   }
 }

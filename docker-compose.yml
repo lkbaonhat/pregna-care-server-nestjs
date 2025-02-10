@@ -10,6 +10,10 @@ services:
         - action: sync
           path: .
           target: /app
+          ignore:
+            - node-modules/
+        - action: rebuild
+          path: package.json
     ports:
       - '8080:8080'
     environment:

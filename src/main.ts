@@ -43,6 +43,7 @@ async function bootstrap() {
     .setDescription('API documentation for PregnaCare application')
     .setVersion('v1')
     .addBearerAuth()
+    .addSecurityRequirements('bearer')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v1', app, documentFactory);

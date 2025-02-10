@@ -20,7 +20,7 @@ describe('EmailsService', () => {
       ],
     }).compile();
 
-    service = module.get<EmailsService>(EmailsService);
+    service = module.get(EmailsService);
   });
 
   it('should be defined', () => {
