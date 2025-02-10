@@ -8,6 +8,7 @@ import { hashPasswordHelper } from '../utils/helper';
 @Schema({
   toJSON: {
     transform(_, ret) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       ret.id = ret._id;
       delete ret._id;
       delete ret.password;

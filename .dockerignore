@@ -1,1 +1,6 @@
-.env
+node_modules
+coverage
+dist
+.git
+.gitignore
+*.md
