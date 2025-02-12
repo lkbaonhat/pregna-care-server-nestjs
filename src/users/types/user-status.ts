@@ -9,6 +9,5 @@ export enum UserStatus {
 
 export enum UserRoles {
   Admin = 'admin',
-  Basic = 'basic',
-  Premium = 'premium',
+  Member = 'member',
 }
