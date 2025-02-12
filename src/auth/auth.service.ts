@@ -34,12 +34,10 @@ export class AuthService {
     );
     const url = `${this.configService.get('EMAIL_CONFIRMATION_URL')}/users/validate-email?token=${token}`;
 
-    await this.mailService.sendMail(
-      email,
-      'Please confirm your email',
-      'validation-email.ejs',
-      { name: email, confirmationLink: url },
-    );
+    await this.mailService.sendVerificationEmail({
+      to: email,
+      data: { name: email, confirmationLink: url },
+    });
 
     return token;
   }
