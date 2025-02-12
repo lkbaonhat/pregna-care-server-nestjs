@@ -33,7 +33,7 @@ export class User {
   @Prop({
     type: String,
     enum: Object.values(UserRoles),
-    default: UserRoles.Basic,
+    default: UserRoles.Member,
   })
   role: UserRoles;
 

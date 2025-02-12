@@ -66,12 +66,20 @@ export class AuthService {
     return {
       id: user._id.toString(),
       email: user.email,
+      // TODO: delete this when production
       confirmationToken: token,
     };
   }
 
   signin(user: Partial<UserDocument>) {
-    const payload = { email: user.email, sub: user._id };
+    const payload = {
+      email: user.email,
+      sub: user._id,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatarUrl: user.avatarUrl,
+    };
     return {
       accessToken: this.jwtService.sign(payload),
       userId: user._id,
