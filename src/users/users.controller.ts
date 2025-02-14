@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Put, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+} from '@nestjs/common';
 
 import { UsersService } from './users.service';
 
@@ -6,10 +16,29 @@ import { ParseMongoIdPipe } from 'src/pipes/parse-mongo-id.pipe';
 import { Response } from 'src/types/core';
 import { Request } from 'express';
 import { User } from './user.schema';
+import { CreateUserDto } from './dtos/create-user.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
+
+  @Get()
+  async getAllUsers(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<Response> {
+    const result = await this.usersService.findAll(Number(page), Number(limit));
+    return { data: result };
+  }
+
+  @Post()
+  async createUser(@Body() body: CreateUserDto): Promise<Response> {
+    const result = await this.usersService.createUserByAdmin(
+      body.email,
+      body.password,
+    );
+    return { data: result };
+  }
 
   @Get('self')
   getSelf(@Req() req: Request): Response {
