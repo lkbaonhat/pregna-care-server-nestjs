@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { User } from './user.schema';
+import { hashPasswordHelper } from 'src/utils/helper';
 
 @Injectable()
 export class UsersService {
@@ -36,5 +37,12 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found to delete');
     // delete user
     return user.deleteOne();
+  }
+
+  async updatePassword(userId: string, newPassword: string) {
+    const hashedPassword = await hashPasswordHelper(newPassword);
+    await this.userModel.findByIdAndUpdate(userId, {
+      password: hashedPassword,
+    });
   }
 }

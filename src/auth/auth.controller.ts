@@ -9,6 +9,7 @@ import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { Response } from 'src/types/core';
 import { Public } from 'src/constants/core';
 import { ConfirmEmailDto } from './dtos/confirm-email.dto';
+import { RequestResetPasswordDto, ResetPasswordDto } from './dtos/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -38,5 +39,19 @@ export class AuthController {
   signIn(@Req() req: Request, @Body() _: CreateUserDto): Response {
     const result = this.authService.signin(req.user!);
     return { data: result, message: 'User signed in' };
+  }
+
+  @Post('request-reset-password')
+  @Public()
+  async requestResetPassword(@Body() body: RequestResetPasswordDto): Promise<Response> {
+    const result = await this.authService.requestPasswordReset(body.email);
+    return { data: result, message: 'Reset password email sent' };
+  }
+
+  @Post('reset-password')
+  @Public()
+  async resetPassword(@Body() body: ResetPasswordDto): Promise<Response> {
+    const result = await this.authService.resetPassword(body.token, body.newPassword);
+    return { data: result, message: 'Password reset successful' };
   }
 }
