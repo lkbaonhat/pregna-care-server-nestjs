@@ -150,4 +150,65 @@ export class AuthService {
       throw new BadRequestException('Bad confirmation token');
     }
   }
+
+  async sendResetPasswordEmail(id: string, email: string) {
+    const token = this.jwtService.sign(
+      { email, sub: id },
+      {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+        expiresIn: '1h',
+      },
+    );
+    const url = `${this.configService.get('EMAIL_CONFIRMATION_URL')}/reset-password?token=${token}`;
+
+    await this.mailService.sendMail(
+      email,
+      'Reset Your Password',
+      'reset-password-email.ejs',
+      { name: email, resetLink: url },
+    );
+
+    return token;
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Send reset password email
+    const token = await this.sendResetPasswordEmail(user._id.toString(), email);
+
+    return {
+      message: 'Password reset email sent',
+      // TODO: remove this in production
+      resetToken: token,
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+      });
+
+      const user = await this.userService.findByEmail(payload.email);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      // Update password
+      await this.userService.updatePassword(user._id.toString(), newPassword);
+
+      return {
+        message: 'Password reset successful',
+      };
+    } catch (error) {
+      if (error?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Reset password token expired');
+      }
+      throw new BadRequestException('Invalid reset password token');
+    }
+  }
 }
