@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Request } from 'express';
 
 import { AuthService } from './auth.service';
@@ -9,6 +17,7 @@ import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { Response } from 'src/types/core';
 import { Public } from 'src/constants/core';
 import { ConfirmEmailDto } from './dtos/confirm-email.dto';
+import { GoogleAuthGuard } from 'src/guards/google-auth/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -38,5 +47,19 @@ export class AuthController {
   signIn(@Req() req: Request, @Body() _: CreateUserDto): Response {
     const result = this.authService.signin(req.user!);
     return { data: result, message: 'User signed in' };
+  }
+
+  //Login with google
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/login')
+  googleLogin() {}
+
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  googleCallBack(@Req() req) {
+    const response = this.authService.signin(req.user.id);
+    return { data: response, message: 'User signed in' };
   }
 }

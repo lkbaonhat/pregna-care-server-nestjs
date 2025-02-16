@@ -14,6 +14,7 @@ import { UserStatus } from 'src/users/types/user-status';
 import { UserDocument } from 'src/users/user.schema';
 import { ConfigService } from '@nestjs/config';
 import { ConfirmToken } from 'src/users/types/confirm-token';
+import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -103,6 +104,15 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async validateGoogleUser(googleUser: CreateUserDto) {
+    const user = await this.userService.findByEmail(googleUser.email);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    if (user) return user;
+    return await this.userService.create(googleUser.email, googleUser.password);
   }
 
   async validateUserById(id: string) {
