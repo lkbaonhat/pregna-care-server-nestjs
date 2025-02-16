@@ -58,8 +58,8 @@ export class AuthController {
   @Public()
   @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
-  googleCallBack(@Req() req) {
+  googleCallBack(@Req() req, @Res() res) {
     const response = this.authService.signin(req.user.id);
-    return { data: response, message: 'User signed in' };
+    res.redirect(`http://localhost:3000?accessToken=${response.accessToken}`);
   }
 }
