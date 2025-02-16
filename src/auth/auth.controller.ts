@@ -61,5 +61,6 @@ export class AuthController {
   googleCallBack(@Req() req, @Res() res) {
     const response = this.authService.signin(req.user.id);
     res.redirect(`http://localhost:3000?accessToken=${response.accessToken}`);
+    return { data: null };
   }
 }
