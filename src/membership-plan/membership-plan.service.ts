@@ -17,7 +17,7 @@ export class MembershipPlanService {
     return this.membershipPlanModel.find();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.membershipPlanModel.findById(id);
   }
 

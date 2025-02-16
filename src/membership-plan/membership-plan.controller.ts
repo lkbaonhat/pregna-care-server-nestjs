@@ -27,7 +27,7 @@ export class MembershipPlanController {
 
   @Get(':id')
   async findOne(@Param('id', ParseMongoIdPipe) id: string): Promise<Response> {
-    const membershipPlan = await this.membershipPlanService.findOne(+id);
+    const membershipPlan = await this.membershipPlanService.findOne(id);
     return { data: membershipPlan };
   }
 
