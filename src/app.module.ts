@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
+import { MembershipPlanModule } from './membership-plan/membership-plan.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
     ]),
     UsersModule,
     AuthModule,
+    MembershipPlanModule,
   ],
   providers: [
     {
