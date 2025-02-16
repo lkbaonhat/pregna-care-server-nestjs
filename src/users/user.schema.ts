@@ -73,6 +73,12 @@ export class User {
     default: null,
   })
   avatarUrl: string;
+
+  @Prop({ type: String, default: 'Unknown' })
+  bloodType: string;
+
+  @Prop({ type: String, default: 'Unknown' })
+  nationality: string;
 }
 
 export type UserDocument = HydratedDocument<User>;
