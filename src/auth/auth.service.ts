@@ -169,12 +169,10 @@ export class AuthService {
     );
     const url = `${this.configService.get('EMAIL_CONFIRMATION_URL')}/reset-password?token=${token}`;
 
-    await this.mailService.sendMail(
-      email,
-      'Reset Your Password',
-      'reset-password-email.ejs',
-      { name: email, resetLink: url },
-    );
+    await this.mailService.sendResetPasswordEmail({
+      to: email,
+      data: { name: email, resetLink: url },
+    });
 
     return token;
   }

@@ -28,4 +28,12 @@ export class EmailsProcessor {
       template: 'validation-email',
     });
   }
+
+  @Process('reset-password')
+  async sendResetPassword(job: Job<Mail>) {
+    await this.sendMail(job, {
+      subject: 'Reset your password',
+      template: 'reset-password-email',
+    });
+  }
 }
