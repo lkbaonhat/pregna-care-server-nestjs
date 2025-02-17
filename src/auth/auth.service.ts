@@ -14,6 +14,7 @@ import { UserStatus } from 'src/users/types/user-status';
 import { UserDocument } from 'src/users/user.schema';
 import { ConfigService } from '@nestjs/config';
 import { ConfirmToken } from 'src/users/types/confirm-token';
+import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -64,12 +65,20 @@ export class AuthService {
     return {
       id: user._id.toString(),
       email: user.email,
+      // TODO: delete this when production
       confirmationToken: token,
     };
   }
 
   signin(user: Partial<UserDocument>) {
-    const payload = { email: user.email, sub: user._id };
+    const payload = {
+      email: user.email,
+      sub: user._id,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatarUrl: user.avatarUrl,
+    };
     return {
       accessToken: this.jwtService.sign(payload),
       userId: user._id,
@@ -93,6 +102,15 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async validateGoogleUser(googleUser: CreateUserDto) {
+    const user = await this.userService.findByEmail(googleUser.email);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    if (user) return user;
+    return await this.userService.create(googleUser.email, googleUser.password);
   }
 
   async validateUserById(id: string) {
@@ -138,6 +156,67 @@ export class AuthService {
         throw new BadRequestException('Email confirmation token expired');
       }
       throw new BadRequestException('Bad confirmation token');
+    }
+  }
+
+  async sendResetPasswordEmail(id: string, email: string) {
+    const token = this.jwtService.sign(
+      { email, sub: id },
+      {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+        expiresIn: '1h',
+      },
+    );
+    const url = `${this.configService.get('EMAIL_CONFIRMATION_URL')}/reset-password?token=${token}`;
+
+    await this.mailService.sendMail(
+      email,
+      'Reset Your Password',
+      'reset-password-email.ejs',
+      { name: email, resetLink: url },
+    );
+
+    return token;
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Send reset password email
+    const token = await this.sendResetPasswordEmail(user._id.toString(), email);
+
+    return {
+      message: 'Password reset email sent',
+      // TODO: remove this in production
+      resetToken: token,
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+      });
+
+      const user = await this.userService.findByEmail(payload.email);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      // Update password
+      await this.userService.updatePassword(user._id.toString(), newPassword);
+
+      return {
+        message: 'Password reset successful',
+      };
+    } catch (error) {
+      if (error?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Reset password token expired');
+      }
+      throw new BadRequestException('Invalid reset password token');
     }
   }
 }

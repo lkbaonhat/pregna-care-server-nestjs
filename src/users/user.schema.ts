@@ -33,7 +33,7 @@ export class User {
   @Prop({
     type: String,
     enum: Object.values(UserRoles),
-    default: UserRoles.Basic,
+    default: UserRoles.Member,
   })
   role: UserRoles;
 
@@ -73,6 +73,12 @@ export class User {
     default: null,
   })
   avatarUrl: string;
+
+  @Prop({ type: String, default: 'Unknown' })
+  bloodType: string;
+
+  @Prop({ type: String, default: 'Unknown' })
+  nationality: string;
 }
 
 export type UserDocument = HydratedDocument<User>;
