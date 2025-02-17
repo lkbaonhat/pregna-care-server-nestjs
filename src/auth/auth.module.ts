@@ -10,6 +10,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 import { LocalStrategy } from './strategies/local.strategy';
+import googleAuthConfig from './config/google-auth.config';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
@@ -23,11 +25,12 @@ import { LocalStrategy } from './strategies/local.strategy';
         },
       }),
     }),
+    ConfigModule.forFeature(googleAuthConfig),
     EmailsModule,
     UsersModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy],
+  providers: [AuthService, LocalStrategy, GoogleStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
