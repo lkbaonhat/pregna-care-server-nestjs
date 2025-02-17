@@ -4,25 +4,24 @@ import { HydratedDocument } from "mongoose";
 @Schema({ timestamps: true })
 export class FetusStandard {
     @Prop({ required: true, default: '' })
-    name: string;
+    name: string; //weight
 
     @Prop({ required: true })
-    unit: string;
+    unit: string; //g
 
-    @Prop({ required: true, default: '' })
-    description: string;
-
-    @Prop({ required: true, default: 0 })
-    minValue: number;
-
-    @Prop({ required: true, default: 0 })
-    maxValue: number;
-
-    @Prop({ required: true, min: 1, max: 40, default: 1 })
-    week: number;
+    @Prop()
+    weeks: weeks[];
 
     @Prop({ default: false })
     isDeleted: boolean;
+}
+
+class weeks {
+    @Prop({ required: true, default: 0 })
+    min: number;
+
+    @Prop({ required: true, default: 0 })
+    max: number;
 }
 
 export type FetusStandardDocument = HydratedDocument<FetusStandard>;
