@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { MembershipPlanModule } from './membership-plan/membership-plan.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { MembershipPlanModule } from './membership-plan/membership-plan.module';
     UsersModule,
     AuthModule,
     MembershipPlanModule,
+    PaymentsModule,
   ],
   providers: [
     {
