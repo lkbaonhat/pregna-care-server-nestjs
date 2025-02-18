@@ -8,7 +8,7 @@ import { ParseMongoIdPipe } from 'src/pipes/parse-mongo-id.pipe';
 import { ApiBody } from '@nestjs/swagger';
 import { MembershipPlan } from './membership-plan.schema';
 
-@Controller('membership-plan')
+@Controller('admin/membership-plan')
 @UseGuards(AdminGuard)
 export class MembershipPlanController {
   constructor(private readonly membershipPlanService: MembershipPlanService) {}

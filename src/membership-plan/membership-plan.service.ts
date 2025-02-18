@@ -37,6 +37,7 @@ export class MembershipPlanService {
     const membershipPlan = await this.membershipPlanModel.findById(id);
     if (!membershipPlan)
       throw new NotFoundException('Membership plan not found');
-    return membershipPlan.deleteOne();
+    membershipPlan.isActive = false;
+    return membershipPlan.save();
   }
 }

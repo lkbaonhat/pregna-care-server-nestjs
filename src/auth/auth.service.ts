@@ -35,12 +35,10 @@ export class AuthService {
     );
     const url = `${this.configService.get('EMAIL_CONFIRMATION_URL')}/users/validate-email?token=${token}`;
 
-    await this.mailService.sendMail(
-      email,
-      'Please confirm your email',
-      'validation-email.ejs',
-      { name: email, confirmationLink: url },
-    );
+    await this.mailService.sendVerificationEmail({
+      to: email,
+      data: { name: email, confirmationLink: url },
+    });
 
     return token;
   }
@@ -171,12 +169,10 @@ export class AuthService {
     );
     const url = `${this.configService.get('EMAIL_CONFIRMATION_URL')}/reset-password?token=${token}`;
 
-    await this.mailService.sendMail(
-      email,
-      'Reset Your Password',
-      'reset-password-email.ejs',
-      { name: email, resetLink: url },
-    );
+    await this.mailService.sendResetPasswordEmail({
+      to: email,
+      data: { name: email, resetLink: url },
+    });
 
     return token;
   }
@@ -185,6 +181,11 @@ export class AuthService {
     const user = await this.userService.findByEmail(email);
     if (!user) {
       throw new BadRequestException('User not found');
+    }
+
+    // Check user status
+    if (user.status !== UserStatus.Active) {
+      throw new BadRequestException('User is not active');
     }
 
     // Send reset password email
