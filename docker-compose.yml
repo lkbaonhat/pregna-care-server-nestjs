@@ -46,6 +46,19 @@ services:
     volumes:
       - redis_data:/data/db
 
+  cache_commander:
+    platform: linux/amd64
+    container_name: pregnacare-cache-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    ports:
+      - '8081:8081'
+    depends_on:
+      - cache
+
 volumes:
   mongo_data:
     driver: local

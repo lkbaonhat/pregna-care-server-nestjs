@@ -183,6 +183,11 @@ export class AuthService {
       throw new BadRequestException('User not found');
     }
 
+    // Check user status
+    if (user.status !== UserStatus.Active) {
+      throw new BadRequestException('User is not active');
+    }
+
     // Send reset password email
     const token = await this.sendResetPasswordEmail(user._id.toString(), email);
 

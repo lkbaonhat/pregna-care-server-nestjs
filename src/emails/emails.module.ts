@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
-import { BullModule } from '@nestjs/bull';
+import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { EmailsService } from './emails.service';
@@ -35,19 +35,9 @@ import { getFullTemplatePath } from 'src/utils/mails';
         },
       }),
     }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        redis: {
-          host: configService.get<string>('REDIS_HOST'),
-          port: configService.get<number>('REDIS_PORT'),
-          password: configService.get<string>('REDIS_PASSWORD'),
-        },
-      }),
-    }),
     BullModule.registerQueue({
       name: 'emails',
+      prefix: 'pregnacare',
     }),
   ],
   providers: [EmailsService, EmailsProcessor],
