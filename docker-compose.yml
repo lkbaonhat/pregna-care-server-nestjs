@@ -17,13 +17,17 @@ services:
     ports:
       - '8080:8080'
     environment:
-      MONGODB_URI: mongodb://root:example@pregnacare-dev:27017
+      MONGODB_URI: mongodb://root:example@pregnacare-mongo:27017
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
     depends_on:
       - mongo
+      - cache
     env_file: .env.development
   mongo:
     image: mongo
-    container_name: pregnacare-dev
+    container_name: pregnacare-mongo
     restart: always
     ports:
       - '27017:27017'
@@ -32,7 +36,31 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
       - mongo_data:/data/db
+  cache:
+    image: redis:6.2-alpine
+    container_name: pregnacare-cache
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - redis_data:/data/db
+
+  cache_commander:
+    platform: linux/amd64
+    container_name: pregnacare-cache-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    ports:
+      - '8081:8081'
+    depends_on:
+      - cache
 
 volumes:
   mongo_data:
+    driver: local
+  redis_data:
     driver: local
