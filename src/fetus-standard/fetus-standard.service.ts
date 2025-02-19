@@ -26,17 +26,22 @@ export class FetusStandardService {
   }
   //#endregion
 
-  //#region Get WeeksRangeActive
-  async weeksRangeActive(min: number, max: number, isActive: boolean) {
+  //#region find all fetus standard
+  async findAll() {
+    const result = await this.userModel.find();
+    return {
+      data: result
+    };
+  }
+  //#endregion
+
+  //#region find fetus standard by name
+  async findFetusStandardByName(name: string, isActive: boolean) {
     try {
-      const result = await this.userModel.
-        find({
-          week: { $gte: min, $lte: max },
-          isDeleted: isActive
-        });
+      const result = await this.userModel.find({ name: name, isDeleted: isActive });
 
       if (!result || result.length === 0) {
-        throw new NotFoundException(`No data found for week range ${min} to ${max}`);
+        throw new NotFoundException(`No data found for name ${name}`);
       }
       return {
         data: result,

@@ -7,9 +7,14 @@ import { Public } from 'src/constants/core';
 export class FetusStandardController {
   constructor(private readonly fetusStandardService: FetusStandardService) { }
 
-  @Get('/weeks-range')
-  async weeksRangeActive(@Query('min') min: number, @Query('max') max: number, @Query('isActive') isActive: boolean) {
-    return this.fetusStandardService.weeksRangeActive(min, max, isActive);
+  @Get('/find-all')
+  async findAll() {
+    return this.fetusStandardService.findAll();
+  }
+
+  @Get('/find-by-name')
+  async findFetusStandardByName(@Query('name') name: string, @Query('isActive') isActive: boolean) {
+    return this.fetusStandardService.findFetusStandardByName(name, isActive);
   }
 
   @Get('/search')
@@ -18,7 +23,6 @@ export class FetusStandardController {
   }
 
   @Post('/create')
-  @Public()
   create(@Body() createFetusStandardDto: CreateFetusStandardDto) {
     return this.fetusStandardService.create(createFetusStandardDto);
   }
