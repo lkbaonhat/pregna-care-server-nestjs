@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, Query, Put, Param, Delete } from '@nestjs/common';
 import { FetusStandardService } from './fetus-standard.service';
 import { CreateFetusStandardDto } from './dto/create-fetus-standard.dto';
+import { Public } from 'src/constants/core';
 
 @Controller('fetus-standard')
 export class FetusStandardController {
@@ -17,6 +18,7 @@ export class FetusStandardController {
   }
 
   @Post('/create')
+  @Public()
   create(@Body() createFetusStandardDto: CreateFetusStandardDto) {
     return this.fetusStandardService.create(createFetusStandardDto);
   }

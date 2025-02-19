@@ -1,4 +1,4 @@
-import { IsNumber, Min, IsOptional, IsString, IsNotEmpty } from "class-validator";
+import { IsNumber, Min, IsString, IsNotEmpty } from "class-validator";
 
 export class CreateFetusStandardDto {
     @IsString()
@@ -11,12 +11,13 @@ export class CreateFetusStandardDto {
 
     @IsNotEmpty()
     weeks: Weeks[];
-
-    @IsOptional()
-    isDeleted: boolean;
 }
 
 class Weeks {
+    @IsNumber()
+    @Min(0, { message: 'Week value must be greater than 0' })
+    week: number;
+
     @IsNumber()
     @Min(0, { message: 'Min value must be greater than 0' })
     min: number;

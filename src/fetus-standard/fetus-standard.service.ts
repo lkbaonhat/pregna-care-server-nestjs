@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFetusStandardDto } from './dto/create-fetus-standard.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { FetusStandard } from './entities/fetus-standard.entity';
@@ -11,6 +11,20 @@ export class FetusStandardService {
   constructor(
     @InjectModel(FetusStandard.name) private userModel: Model<FetusStandard>
   ) { }
+
+  //#region findOneStandardByName
+  async findOneStandardByName(name: string) {
+    const result = await this.userModel.findOne({ name: name });
+    return result ? result : null;
+  }
+  //#endregion
+
+  //#region checkDuplicateStandardByWeek
+  async checkDuplicateStandardByWeek(week: number) {
+    const result = await this.userModel.findOne({ week: week });
+    return result ? result : null;
+  }
+  //#endregion
 
   //#region Get WeeksRangeActive
   async weeksRangeActive(min: number, max: number, isActive: boolean) {
@@ -52,16 +66,36 @@ export class FetusStandardService {
   //#endregion
 
   //#region Create FetusStandard
-  create(createFetusStandardDto: CreateFetusStandardDto) {
+  async create(createFetusStandardDto: CreateFetusStandardDto) {
     try {
-      const createdFetusStandard = new this.userModel(createFetusStandardDto);
-      createdFetusStandard.save();
-      return {
-        data: createdFetusStandard
-      };
+      const isFetusExist = await this.findOneStandardByName(createFetusStandardDto.name);
+
+      if (isFetusExist) {
+        const duplicateWeeks = createFetusStandardDto.weeks
+          .filter(week => isFetusExist.weeks.some(w => w.week === week.week))
+          .map(w => w.week);
+
+        if (duplicateWeeks.length > 0) {
+          throw new ConflictException(`Week ${duplicateWeeks.join(', ')} already exist for ${createFetusStandardDto.name}`);
+        }
+
+        // Add new weeks to existing fetus standard
+        isFetusExist.weeks.push(...createFetusStandardDto.weeks);
+        isFetusExist.save();
+        return {
+          data: isFetusExist
+        };
+
+      } else {
+        const createdFetusStandard = new this.userModel(createFetusStandardDto);
+        createdFetusStandard.save();
+        return {
+          data: createdFetusStandard
+        };
+      }
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
+      if (error instanceof ConflictException) {
+        throw error;
       }
       throw new Error('Error');
     }

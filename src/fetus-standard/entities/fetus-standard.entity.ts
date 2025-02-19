@@ -4,10 +4,10 @@ import { HydratedDocument } from "mongoose";
 @Schema({ timestamps: true })
 export class FetusStandard {
     @Prop({ required: true, default: '' })
-    name: string; //weight
+    name: string; //E.g. weight
 
     @Prop({ required: true })
-    unit: string; //g
+    unit: string; //E.g g
 
     @Prop()
     weeks: weeks[];
@@ -17,6 +17,9 @@ export class FetusStandard {
 }
 
 class weeks {
+    @Prop({ required: true, default: 0 })
+    week: number;
+
     @Prop({ required: true, default: 0 })
     min: number;
 
