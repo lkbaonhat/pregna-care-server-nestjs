@@ -97,7 +97,7 @@ export class FetusStandardService {
   //#region Search 
   async search(name: string) {
     const regex = new RegExp(name, 'i');
-    const result = await this.userModel.find({ name: regex });
+    const result = await this.userModel.find({ name: regex }).select('name unit');
 
     if (!result || result.length === 0) {
       throw new NotFoundException(`No data found for name ${name}`);
@@ -149,12 +149,34 @@ export class FetusStandardService {
   //#region Update FetusStandard
   async update(createFetusStandardDto: UpdateFetusStandardDto, id: string) {
     try {
-      const updatedFetusStandard = await this.userModel.findByIdAndUpdate(id, createFetusStandardDto, { new: true });
-      if (!updatedFetusStandard) {
+      const existingFetusStandard = await this.userModel.findById(id);
+      if (!existingFetusStandard) {
         throw new NotFoundException(`No data found for id ${id}`);
       }
+
+      Object.keys(createFetusStandardDto).forEach((key) => {
+        if (key === "weeks" && Array.isArray(createFetusStandardDto.weeks)) {
+          createFetusStandardDto.weeks.forEach((newWeek) => {
+            const existingWeekIndex = existingFetusStandard.weeks.findIndex(
+              (week) => week.week === newWeek.week
+            );
+
+            if (existingWeekIndex !== -1) {
+              existingFetusStandard.weeks[existingWeekIndex] = {
+                ...existingFetusStandard.weeks[existingWeekIndex],
+                ...newWeek,
+              };
+            }
+          });
+        } else if (createFetusStandardDto[key] !== undefined) {
+          existingFetusStandard[key] = createFetusStandardDto[key];
+        }
+      });
+
+      const updatedFetusStandard = await existingFetusStandard.save();
+
       return {
-        data: updatedFetusStandard
+        data: updatedFetusStandard,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {

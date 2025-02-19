@@ -3,6 +3,7 @@ import { FetusStandardService } from './fetus-standard.service';
 import { CreateFetusStandardDto } from './dto/create-fetus-standard.dto';
 import { Public } from 'src/constants/core';
 import { Pagination } from './dto/pagination';
+import { UpdateFetusStandardDto } from './dto/update-fetus-standard.dto';
 
 @Controller('fetus-standard')
 export class FetusStandardController {
@@ -30,18 +31,21 @@ export class FetusStandardController {
   }
 
   @Get('/search')
+  @Public()
   async search(@Query('name') name: string) {
     return this.fetusStandardService.search(name);
   }
 
   @Post('/create')
+  @Public()
   create(@Body() createFetusStandardDto: CreateFetusStandardDto) {
     return this.fetusStandardService.create(createFetusStandardDto);
   }
 
   @Put('/update/id=:id')
-  update(@Body() createFetusStandardDto: CreateFetusStandardDto, @Param('id') id: string) {
-    return this.fetusStandardService.update(createFetusStandardDto, id);
+  @Public()
+  update(@Body() updatedFetusStandard: UpdateFetusStandardDto, @Param('id') id: string) {
+    return this.fetusStandardService.update(updatedFetusStandard, id);
   }
 
   @Delete('/soft-delete/id=:id')
