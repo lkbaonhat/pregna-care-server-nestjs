@@ -10,6 +10,7 @@ import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { MembershipPlanModule } from './membership-plan/membership-plan.module';
 import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
+import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
     AuthModule,
     MembershipPlanModule,
     FetusStandardModule,
+    FetalDiseaseModule,
   ],
   providers: [
     {

@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FetusStandard } from './entities/fetus-standard.entity';
 import { Model } from 'mongoose';
 import { UpdateFetusStandardDto } from './dto/update-fetus-standard.dto';
-import { Pagination } from './dto/pagination';
 
 @Injectable()
 export class FetusStandardService {
