@@ -1,4 +1,36 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsArray, IsNotEmpty, IsNumber, IsString, ValidateNested } from "class-validator";
+
+class Range {
+    @IsNumber()
+    @IsNotEmpty()
+    min: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    max: number;
+}
+class Criteria {
+    @ValidateNested()
+    @Type(() => Range)
+    weight?: Range;
+
+    @ValidateNested()
+    @Type(() => Range)
+    BPD?: Range;
+
+    @ValidateNested()
+    @Type(() => Range)
+    AC?: Range;
+
+    @ValidateNested()
+    @Type(() => Range)
+    FL?: Range;
+
+    @ValidateNested()
+    @Type(() => Range)
+    bpm?: Range;
+}
 
 export class CreateFetalDiseaseDto {
     @IsString()
@@ -17,25 +49,7 @@ export class CreateFetalDiseaseDto {
     @IsString()
     severity: string;
 
-    @IsString()
-    @IsNotEmpty()
+    @ValidateNested()
+    @Type(() => Criteria)
     criteria: Criteria;
-}
-
-class Criteria {
-    weight: Range;
-    BPD: Range;
-    AC: Range;
-    FL: Range;
-    bpm: Range;
-}
-
-class Range {
-    @IsNumber()
-    @IsNotEmpty()
-    min: number;
-
-    @IsNumber()
-    @IsNotEmpty()
-    max: number;
 }

@@ -21,9 +21,10 @@ export class FetusStandardController {
     @Query('minWeek') minWeek: number,
     @Query('maxWeek') maxWeek: number,
     @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
+    @Query('limit') limit: number = 10,
+    @Query('isDeleted') isDeleted: boolean = false
   ) {
-    return this.fetusStandardService.findFetusStandardByNameAndWeek(name, +minWeek, +maxWeek, page, limit);
+    return this.fetusStandardService.findFetusStandardByNameAndWeek(name, +minWeek, +maxWeek, page, limit, isDeleted);
   }
 
   @Get('/search')

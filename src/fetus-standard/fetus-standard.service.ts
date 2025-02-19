@@ -51,9 +51,9 @@ export class FetusStandardService {
   //#endregion
 
   //#region find fetus standard by name and week
-  async findFetusStandardByNameAndWeek(name: string, minWeek: number, maxWeek: number, page: number, limit: number) {
+  async findFetusStandardByNameAndWeek(name: string, minWeek: number, maxWeek: number, page: number, limit: number, isDeleted: boolean) {
     try {
-      const result = await this.userModel.findOne({ name: name });
+      const result = await this.userModel.findOne({ name: name, isDeleted: isDeleted });
 
       const min = minWeek && !isNaN(Number(minWeek)) ? Number(minWeek) : undefined;
       const max = maxWeek && !isNaN(Number(maxWeek)) ? Number(maxWeek) : undefined;
