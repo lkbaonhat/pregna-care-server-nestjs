@@ -2,19 +2,31 @@ import { Controller, Post, Body, Get, Query, Put, Param, Delete } from '@nestjs/
 import { FetusStandardService } from './fetus-standard.service';
 import { CreateFetusStandardDto } from './dto/create-fetus-standard.dto';
 import { Public } from 'src/constants/core';
+import { Pagination } from './dto/pagination';
 
 @Controller('fetus-standard')
 export class FetusStandardController {
   constructor(private readonly fetusStandardService: FetusStandardService) { }
 
   @Get('/find-all')
-  async findAll() {
-    return this.fetusStandardService.findAll();
+  @Public()
+  async findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ) {
+    return this.fetusStandardService.findAll(page, limit);
   }
 
-  @Get('/find-by-name')
-  async findFetusStandardByName(@Query('name') name: string, @Query('isActive') isActive: boolean) {
-    return this.fetusStandardService.findFetusStandardByName(name, isActive);
+  @Get('/find-by-name-week')
+  @Public()
+  async findFetusStandardByNameAndWeek(
+    @Query('name') name: string,
+    @Query('minWeek') minWeek: number,
+    @Query('maxWeek') maxWeek: number,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ) {
+    return this.fetusStandardService.findFetusStandardByNameAndWeek(name, +minWeek, +maxWeek, page, limit);
   }
 
   @Get('/search')

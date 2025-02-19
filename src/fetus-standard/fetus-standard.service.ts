@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FetusStandard } from './entities/fetus-standard.entity';
 import { Model } from 'mongoose';
 import { UpdateFetusStandardDto } from './dto/update-fetus-standard.dto';
+import { Pagination } from './dto/pagination';
 
 @Injectable()
 export class FetusStandardService {
@@ -27,24 +28,62 @@ export class FetusStandardService {
   //#endregion
 
   //#region find all fetus standard
-  async findAll() {
-    const result = await this.userModel.find();
+  async findAll(page: number, limit: number) {
+    const result = await this.userModel
+      .find()
+      .select('name unit');
+
+    const total = result.length;
+    const startIndex = (page - 1) * limit;
+    const paginatedResult = result.slice(startIndex, startIndex + limit);
+
     return {
-      data: result
+      data: {
+        paginatedResult,
+        pagination: {
+          total: total,
+          page: page,
+          limit: limit,
+          totalPages: Math.ceil(total / limit),
+        }
+      }
     };
   }
   //#endregion
 
-  //#region find fetus standard by name
-  async findFetusStandardByName(name: string, isActive: boolean) {
+  //#region find fetus standard by name and week
+  async findFetusStandardByNameAndWeek(name: string, minWeek: number, maxWeek: number, page: number, limit: number) {
     try {
-      const result = await this.userModel.find({ name: name, isDeleted: isActive });
+      const result = await this.userModel.findOne({ name: name });
 
-      if (!result || result.length === 0) {
-        throw new NotFoundException(`No data found for name ${name}`);
+      const min = minWeek && !isNaN(Number(minWeek)) ? Number(minWeek) : undefined;
+      const max = maxWeek && !isNaN(Number(maxWeek)) ? Number(maxWeek) : undefined;
+
+      let filteredWeeks = result?.weeks;
+      if (min !== undefined && max !== undefined) {
+        filteredWeeks = result?.weeks.filter(week => week.week >= min && week.week <= max);
+      } else if (min !== undefined) {
+        filteredWeeks = result?.weeks.filter(week => week.week >= min);
+      } else if (max !== undefined) {
+        filteredWeeks = result?.weeks.filter(week => week.week <= max);
       }
+
+      const total = filteredWeeks ? filteredWeeks.length : 0;
+      const startIndex = (page - 1) * limit;
+      const paginatedWeeks = filteredWeeks ? filteredWeeks.slice(startIndex, startIndex + limit) : [];
+
       return {
-        data: result,
+        data: {
+          name: result?.name,
+          unit: result?.unit,
+          weeks: paginatedWeeks,
+          pagination: {
+            total: total,
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(total / limit),
+          }
+        }
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
