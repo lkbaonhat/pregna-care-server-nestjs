@@ -7,9 +7,10 @@ import { BullModule } from '@nestjs/bullmq';
 
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { StripeModule } from './stripe/stripe.module';
+import { MembershipPlanModule } from './membership-plan/membership-plan.module';
 import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
-import { MembershipPlanModule } from './membership-plan/membership-plan.module';
 import { PaymentsModule } from './payments/payments.module';
 
 @Module({
@@ -45,6 +46,7 @@ import { PaymentsModule } from './payments/payments.module';
     AuthModule,
     MembershipPlanModule,
     PaymentsModule,
+    StripeModule,
   ],
   providers: [
     {

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 
 import { PaymentsModule } from 'src/payments/payments.module';
 import { UsersModule } from 'src/users/users.module';
@@ -9,7 +10,13 @@ import { StripeService } from './stripe.service';
 import { AuthStripeService } from './auth-stripe.service';
 
 @Module({
-  imports: [PaymentsModule, UsersModule],
+  imports: [
+    PaymentsModule,
+    UsersModule,
+    BullModule.registerQueue({
+      name: 'stripe',
+    }),
+  ],
   providers: [StripeService, AuthStripeService],
   exports: [StripeService],
   controllers: [StripeController],

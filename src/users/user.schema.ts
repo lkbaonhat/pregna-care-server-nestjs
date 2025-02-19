@@ -4,6 +4,8 @@ import { HydratedDocument } from 'mongoose';
 import { UserRoles, UserStatus } from './types/user-status';
 import { EMPTY_STRING } from '../constants/core';
 import { hashPasswordHelper } from '../utils/helper';
+import { MembershipDocument, MembershipSchema } from './membership.schema';
+import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
 
 @Schema({
   toJSON: {
@@ -36,6 +38,15 @@ export class User {
     default: UserRoles.Member,
   })
   role: UserRoles;
+
+  @Prop({
+    type: MembershipSchema,
+    default: {
+      plan: MembershipPlanTypes.Free,
+      dueDate: null,
+    },
+  })
+  membership: MembershipDocument;
 
   @Prop({
     type: String,

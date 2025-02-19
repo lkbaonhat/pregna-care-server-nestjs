@@ -11,8 +11,8 @@ import { StripeCheckoutSessionRequestDto } from './dtos/stripe-checkout-session-
 export class StripeController {
   constructor(private readonly authStripeService: AuthStripeService) {}
 
-  @Post('checkout-session')
-  async createCheckoutSession(
+  @Post('membership-plan/checkout-session')
+  async createCheckoutSessionMembershipPlan(
     @Req() req: Request,
     @Body() createSessionBody: StripeCheckoutSessionRequestDto,
   ): Promise<Response> {

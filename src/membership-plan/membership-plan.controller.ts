@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { MembershipPlanService } from './membership-plan.service';
 import { CreateMembershipPlanDto } from './dto/create-membership-plan.dto';
 import { UpdateMembershipPlanDto } from './dto/update-membership-plan.dto';
@@ -14,8 +23,12 @@ export class MembershipPlanController {
   constructor(private readonly membershipPlanService: MembershipPlanService) {}
 
   @Post()
-  async create(@Body() createMembershipPlanDto: CreateMembershipPlanDto): Promise<Response> {
-    const membershipPlan = await this.membershipPlanService.create(createMembershipPlanDto);
+  async create(
+    @Body() createMembershipPlanDto: CreateMembershipPlanDto,
+  ): Promise<Response> {
+    const membershipPlan = await this.membershipPlanService.create(
+      createMembershipPlanDto,
+    );
     return { data: membershipPlan, message: 'Membership plan created' };
   }
 
@@ -33,14 +46,20 @@ export class MembershipPlanController {
 
   @Patch(':id')
   @ApiBody({ type: UpdateMembershipPlanDto })
-  async update(@Param('id', ParseMongoIdPipe) id: string, @Body() updateMembershipPlanDto: Partial<MembershipPlan>): Promise<Response> {
-    const membershipPlan = await this.membershipPlanService.update(id, updateMembershipPlanDto);
+  async update(
+    @Param('id', ParseMongoIdPipe) id: string,
+    @Body() updateMembershipPlanDto: Partial<MembershipPlan>,
+  ): Promise<Response> {
+    const membershipPlan = await this.membershipPlanService.update(
+      id,
+      updateMembershipPlanDto,
+    );
     return { data: membershipPlan, message: 'Membership plan updated' };
   }
 
   @Delete(':id')
   async remove(@Param('id', ParseMongoIdPipe) id: string): Promise<Response> {
     const membershipPlan = await this.membershipPlanService.remove(id);
-    return { data: membershipPlan, message: 'Membership plan deleted' }; 
+    return { data: membershipPlan, message: 'Membership plan deleted' };
   }
 }

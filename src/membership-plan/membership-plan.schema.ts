@@ -29,7 +29,7 @@ export class MembershipPlan {
     enum: Object.values(MembershipPlanTypes),
     unique: true,
   })
-  type: string;
+  type: MembershipPlanTypes;
   @Prop({
     type: String,
     default: EMPTY_STRING,
