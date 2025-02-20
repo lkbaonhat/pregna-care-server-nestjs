@@ -121,6 +121,8 @@ export class StripeService {
 
     payment.status = result.status;
 
+    await payment.save();
+
     return result;
   }
 
