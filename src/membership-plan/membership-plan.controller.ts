@@ -18,10 +18,10 @@ import { ApiBody } from '@nestjs/swagger';
 import { MembershipPlan } from './membership-plan.schema';
 
 @Controller('admin/membership-plan')
-@UseGuards(AdminGuard)
 export class MembershipPlanController {
   constructor(private readonly membershipPlanService: MembershipPlanService) {}
 
+  @UseGuards(AdminGuard)
   @Post()
   async create(
     @Body() createMembershipPlanDto: CreateMembershipPlanDto,
@@ -44,6 +44,7 @@ export class MembershipPlanController {
     return { data: membershipPlan };
   }
 
+  @UseGuards(AdminGuard)
   @Patch(':id')
   @ApiBody({ type: UpdateMembershipPlanDto })
   async update(
@@ -57,6 +58,7 @@ export class MembershipPlanController {
     return { data: membershipPlan, message: 'Membership plan updated' };
   }
 
+  @UseGuards(AdminGuard)
   @Delete(':id')
   async remove(@Param('id', ParseMongoIdPipe) id: string): Promise<Response> {
     const membershipPlan = await this.membershipPlanService.remove(id);

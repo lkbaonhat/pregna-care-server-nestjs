@@ -3,8 +3,9 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
+import { format } from 'date-fns';
 
-import { UserDocument } from 'src/users/user.schema';
+import { User, UserDocument } from 'src/users/user.schema';
 import { stripeConfig } from 'src/config/stripe-config';
 import { StripeCustomerDto } from './dtos/customer.dto';
 import { StripeCustomerData } from './stripe-customer.processor';
@@ -12,6 +13,7 @@ import { PaymentsService } from 'src/payments/payments.service';
 import { PaymentIntentRequestDto } from './dtos/payment-intent-request.dto';
 import { ConfirmPaymentIntentRequestDto } from './dtos/confirm-payment-intent-request.dto';
 import { AttachPaymentMethodDto } from './dtos/attach-payment-method-dto';
+import { EmailsService } from 'src/emails/emails.service';
 
 @Injectable()
 export class StripeService {
@@ -20,6 +22,7 @@ export class StripeService {
     @Inject(ConfigService) private configService: ConfigService,
     @InjectQueue('stripe-customer') private readonly customerStripeQueue: Queue,
     private paymentsService: PaymentsService,
+    private emailsService: EmailsService,
   ) {
     this.stripe = new Stripe(
       this.configService.getOrThrow('STRIPE_SECRET_KEY'),
@@ -120,8 +123,25 @@ export class StripeService {
     });
 
     payment.status = result.status;
-
     await payment.save();
+
+    const paymentPopulated = await payment.populate<{ userId: User }>('userId');
+    const email = paymentPopulated.userId.email;
+
+    // Convert date from number to string
+    const date = format(new Date(result.created * 1000), 'MM/dd/yyyy HH:mm:ss');
+
+    if (result.status === 'succeeded')
+      await this.emailsService.sendPaymentSuccessEmail({
+        to: email,
+        data: {
+          email: email,
+          amount: result.amount,
+          currency: result.currency.toUpperCase(),
+          transactionId: result.id,
+          paymentDate: date,
+        },
+      });
 
     return result;
   }

@@ -21,6 +21,9 @@ export class EmailsProcessor extends WorkerHost {
       case 'reset-password':
         await this.sendResetPassword(job);
         break;
+      case 'payment-success':
+        await this.sendPaymentSuccess(job);
+        break;
       default:
         break;
     }
@@ -54,6 +57,13 @@ export class EmailsProcessor extends WorkerHost {
     await this.sendMail(job, {
       subject: 'Reset your password',
       template: 'reset-password-email',
+    });
+  }
+
+  async sendPaymentSuccess(job: Job<Mail>) {
+    await this.sendMail(job, {
+      subject: 'Payment successful',
+      template: 'payment-success-email',
     });
   }
 }

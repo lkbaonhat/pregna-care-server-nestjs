@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Success</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(90deg, #ee7a7a 0%, #acbcf7 100%);
+    "
+  >
+    <table
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      width="100%"
+      style="
+        min-width: 100%;
+        background: linear-gradient(90deg, #ee7a7a 0%, #acbcf7 100%);
+      "
+    >
+      <tr>
+        <td align="center" style="padding: 40px 0">
+          <table
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            width="600"
+            style="
+              max-width: 600px;
+              background-color: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            "
+          >
+            <tr>
+              <td style="padding: 40px">
+                <h1
+                  style="
+                    color: #333333;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                    text-align: center;
+                  "
+                >
+                  Payment Successful!
+                </h1>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                  "
+                >
+                  Dear <%= locals.email %>,
+                </p>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                  "
+                >
+                  Thank you for your payment. Your transaction has been
+                  successfully processed.
+                </p>
+                <table
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  width="100%"
+                  style="
+                    background-color: #f8f8f8;
+                    border-radius: 4px;
+                    margin-bottom: 20px;
+                  "
+                >
+                  <tr>
+                    <td style="padding: 20px">
+                      <h2
+                        style="
+                          color: #333333;
+                          font-size: 18px;
+                          margin-bottom: 10px;
+                        "
+                      >
+                        Payment Details:
+                      </h2>
+                      <p style="color: #666666; font-size: 14px; margin: 5px 0">
+                        <strong>Amount:</strong> <%= locals.amount %> <%=
+                        locals.currency %>
+                      </p>
+                      <p style="color: #666666; font-size: 14px; margin: 5px 0">
+                        <strong>Transaction ID:</strong> <%=
+                        locals.transactionId %>
+                      </p>
+                      <p style="color: #666666; font-size: 14px; margin: 5px 0">
+                        <strong>Date:</strong> <%= locals.paymentDate %>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                  "
+                >
+                  If you have any questions or concerns, please don't hesitate
+                  to contact our support team.
+                </p>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                  "
+                >
+                  Thank you for your business!
+                </p>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 0;
+                  "
+                >
+                  Best regards,<br />
+                  The SWD Team
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -44,7 +44,7 @@ export class StripeController {
     return { data };
   }
 
-  @Post('confirm-payment-intent')
+  @Post('payment-intent/confirm')
   async confirmPaymentIntent(
     @Body() body: ConfirmPaymentIntentRequestDto,
   ): Promise<Response> {
