@@ -11,6 +11,7 @@ import { StripeCustomerData } from './stripe-customer.processor';
 import { PaymentsService } from 'src/payments/payments.service';
 import { PaymentIntentRequestDto } from './dtos/payment-intent-request.dto';
 import { ConfirmPaymentIntentRequestDto } from './dtos/confirm-payment-intent-request.dto';
+import { AttachPaymentMethodDto } from './dtos/attach-payment-method-dto';
 
 @Injectable()
 export class StripeService {
@@ -18,7 +19,6 @@ export class StripeService {
   constructor(
     @Inject(ConfigService) private configService: ConfigService,
     @InjectQueue('stripe-customer') private readonly customerStripeQueue: Queue,
-    @InjectQueue('stripe-payments') private readonly paymentsStripeQueue: Queue,
     private paymentsService: PaymentsService,
   ) {
     this.stripe = new Stripe(
@@ -51,14 +51,19 @@ export class StripeService {
 
   async attachPaymentMethodToCustomer(
     user: UserDocument,
-    data: Exclude<StripeCustomerDto, 'email'>,
+    data: AttachPaymentMethodDto,
   ) {
-    const job = await this.customerStripeQueue.add('attach-payment-method', {
-      user,
-      stripeCustomer: data,
-    } as StripeCustomerData);
+    if (!user.stripeCustomerId)
+      throw new BadRequestException('User not registered in stripe');
 
-    return job.id;
+    const { paymentMethodId } = data;
+
+    const paymentMethod = await this.stripe.paymentMethods.attach(
+      paymentMethodId,
+      { customer: user.stripeCustomerId },
+    );
+
+    return paymentMethod;
   }
 
   async retrivePaymentMethodList(user: UserDocument) {
@@ -79,8 +84,11 @@ export class StripeService {
     if (!user.stripeCustomerId)
       throw new BadRequestException('User not registered in stripe');
 
+    const actualAmount = data.amount * 100;
+
     const paymentIntent = await this.stripe.paymentIntents.create({
       ...data,
+      amount: actualAmount,
       customer: user.stripeCustomerId,
       confirmation_method: 'manual',
     });
@@ -89,7 +97,7 @@ export class StripeService {
       userId: user._id,
       stripeId: paymentIntent.id,
       stripeObject: paymentIntent.object,
-      amount: paymentIntent.amount,
+      amount: actualAmount,
       currency: paymentIntent.currency,
       paymentMethodTypes: paymentIntent.payment_method_types,
       status: paymentIntent.status,
@@ -102,11 +110,13 @@ export class StripeService {
     paymentIntentId,
     paymentMethodId,
   }: ConfirmPaymentIntentRequestDto) {
-    const payment = await this.paymentsService.findById(paymentIntentId);
+    const payment =
+      await this.paymentsService.findByPaymentIntentId(paymentIntentId);
     if (!payment) throw new BadRequestException('Payment not found');
 
     const result = await this.stripe.paymentIntents.confirm(paymentIntentId, {
       payment_method: paymentMethodId,
+      return_url: `${this.configService.getOrThrow<string>('EMAIL_CONFIRMATION_URL')}/payments/success`,
     });
 
     payment.status = result.status;

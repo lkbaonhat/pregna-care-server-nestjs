@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsCurrency, IsInt, IsPositive, IsString } from 'class-validator';
+import {
+  IsInt,
+  IsISO4217CurrencyCode,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 
 export class PaymentIntentRequestDto {
   @ApiProperty()
@@ -8,7 +13,7 @@ export class PaymentIntentRequestDto {
   amount: number;
 
   @ApiProperty()
-  @IsCurrency()
+  @IsISO4217CurrencyCode()
   currency: string;
 
   @ApiProperty()

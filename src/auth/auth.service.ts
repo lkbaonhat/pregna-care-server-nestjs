@@ -139,8 +139,7 @@ export class AuthService {
     await user.save();
 
     // Create Stripe customer
-    await this.stripeService.createStripeCustomer({
-      email: user.email,
+    await this.stripeService.createStripeCustomer(user, {
       name: user.firstName,
       phone: user.phoneNumber,
     });

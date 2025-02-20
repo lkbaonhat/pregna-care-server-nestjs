@@ -18,6 +18,10 @@ export class PaymentsService {
     return this.paymentModel.findById(id);
   }
 
+  async findByPaymentIntentId(paymentIntentId: string) {
+    return this.paymentModel.findOne({ stripeId: paymentIntentId });
+  }
+
   async findByUser(userId: string) {
     return this.paymentModel.find({ userId });
   }
