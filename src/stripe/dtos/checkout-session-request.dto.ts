@@ -8,14 +8,14 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { StripeCheckoutLineItem } from './stripe-checkout-line-item.dto';
+import { CheckoutLineItem } from './checkout-line-item.dto';
 
-export class StripeCheckoutSessionRequestDto {
-  @ApiProperty({ isArray: true, type: StripeCheckoutLineItem })
+export class CheckoutSessionRequestDto {
+  @ApiProperty({ isArray: true, type: CheckoutLineItem })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => StripeCheckoutLineItem)
-  lineItems: StripeCheckoutLineItem[];
+  @Type(() => CheckoutLineItem)
+  lineItems: CheckoutLineItem[];
 
   @ApiProperty({ type: String })
   @IsIn(['subscription', 'payment', 'setup'])

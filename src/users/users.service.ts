@@ -11,7 +11,7 @@ import { hashPasswordHelper } from 'src/utils/helper';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private userModel: Model<User>) { }
+  constructor(@InjectModel('User') private userModel: Model<User>) {}
 
   create(email: string, password: string) {
     const user = new this.userModel({ email, password });

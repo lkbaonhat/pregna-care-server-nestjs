@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Payment } from './payment.schema';
-import { UserDocument } from 'src/users/user.schema';
 
 @Injectable()
 export class PaymentsService {
@@ -20,12 +19,10 @@ export class PaymentsService {
   }
 
   async findByUser(userId: string) {
-    return this.paymentModel.find({ user: userId });
+    return this.paymentModel.find({ userId });
   }
 
-  async create(user: Partial<UserDocument>) {
-    return this.paymentModel.create({
-      user,
-    });
+  async create(data: Partial<Payment>) {
+    return this.paymentModel.create(data);
   }
 }

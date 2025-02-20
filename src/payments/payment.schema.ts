@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 
 import { User } from 'src/users/user.schema';
+import { PaymentIntentStatus } from './types/payment-intent-status';
 
 @Schema({
   toJSON: {
@@ -21,25 +22,44 @@ export class Payment {
     ref: User.name,
     required: true,
   })
-  user: Types.ObjectId;
+  userId: Types.ObjectId;
 
   @Prop({
     type: String,
-    default: null,
+    required: true,
+    unique: true,
   })
-  stripeSessionId: string;
+  stripeId: string;
 
   @Prop({
     type: String,
-    default: null,
+    required: true,
   })
-  stripeObjectType: string;
+  stripeObject: string;
 
   @Prop({
-    type: SchemaTypes.Mixed,
-    default: null,
+    type: Number,
+    required: true,
   })
-  stripeData: unknown;
+  amount: number;
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  currency: string;
+
+  @Prop({
+    type: [String],
+    required: true,
+  })
+  paymentMethodTypes: string[];
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  status: PaymentIntentStatus;
 }
 
 export type PaymentDocument = HydratedDocument<Payment>;

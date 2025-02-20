@@ -9,7 +9,7 @@ import { Mail } from './types/mail';
   concurrency: 2,
 })
 export class EmailsProcessor extends WorkerHost {
-  private readonly logger = new Logger();
+  private readonly logger = new Logger(EmailsProcessor.name);
   constructor(private readonly mailService: MailerService) {
     super();
   }

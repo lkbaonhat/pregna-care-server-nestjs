@@ -1,24 +1,16 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 
-import { PaymentsModule } from 'src/payments/payments.module';
-import { UsersModule } from 'src/users/users.module';
-
-import { StripeController } from './stripe.controller';
-
 import { StripeService } from './stripe.service';
-import { AuthStripeService } from './auth-stripe.service';
+import { StripeCustomerProcessor } from './stripe-customer.processor';
+import { PaymentsModule } from 'src/payments/payments.module';
 
 @Module({
   imports: [
+    BullModule.registerQueue({ name: 'stripe-customer', prefix: 'pregnacare' }),
     PaymentsModule,
-    UsersModule,
-    BullModule.registerQueue({
-      name: 'stripe',
-    }),
   ],
-  providers: [StripeService, AuthStripeService],
+  providers: [StripeService, StripeCustomerProcessor],
   exports: [StripeService],
-  controllers: [StripeController],
 })
 export class StripeModule {}

@@ -34,6 +34,11 @@ export class User {
 
   @Prop({
     type: String,
+  })
+  stripeCustomerId?: string;
+
+  @Prop({
+    type: String,
     enum: Object.values(UserRoles),
     default: UserRoles.Member,
   })

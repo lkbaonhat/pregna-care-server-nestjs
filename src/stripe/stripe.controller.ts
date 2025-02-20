@@ -1,25 +1,31 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 
-import { AuthStripeService } from './auth-stripe.service';
 import { Response } from 'src/types/core';
-import { StripeCheckoutSessionRequestDto } from './dtos/stripe-checkout-session-request.dto';
+import { StripeService } from './stripe.service';
+import { UserDocument } from 'src/users/user.schema';
+import { PaymentIntentRequestDto } from './dtos/payment-intent-request.dto';
 
 @ApiBearerAuth()
 @Controller('payments/stripe')
 export class StripeController {
-  constructor(private readonly authStripeService: AuthStripeService) {}
+  constructor(private readonly stripeService: StripeService) {}
 
-  @Post('membership-plan/checkout-session')
-  async createCheckoutSessionMembershipPlan(
+  @Get('methods')
+  async getPaymentMethods(@Req() req: Request): Promise<Response> {
+    const user = req.user as UserDocument;
+    const data = await this.stripeService.retrivePaymentMethodList(user);
+    return { data };
+  }
+
+  @Post('payment-intent')
+  async createPaymentIntent(
     @Req() req: Request,
-    @Body() createSessionBody: StripeCheckoutSessionRequestDto,
+    @Body() body: PaymentIntentRequestDto,
   ): Promise<Response> {
-    const session = await this.authStripeService.createCheckoutSession(
-      createSessionBody,
-      req.user!,
-    );
-    return { data: session };
+    const user = req.user as UserDocument;
+    const data = await this.stripeService.createPaymentIntent(user, body);
+    return { data };
   }
 }
