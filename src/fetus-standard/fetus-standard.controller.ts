@@ -3,7 +3,7 @@ import { FetusStandardService } from './fetus-standard.service';
 import { CreateFetusStandardDto } from './dto/create-fetus-standard.dto';
 import { UpdateFetusStandardDto } from './dto/update-fetus-standard.dto';
 
-@Controller('fetus-standard')
+@Controller('admin/fetus-standard')
 export class FetusStandardController {
   constructor(private readonly fetusStandardService: FetusStandardService) { }
 
