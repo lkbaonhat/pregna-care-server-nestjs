@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Get, Query, Put, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Put, Param, Delete, UseGuards } from '@nestjs/common';
 import { FetusStandardService } from './fetus-standard.service';
 import { CreateFetusStandardDto } from './dto/create-fetus-standard.dto';
 import { UpdateFetusStandardDto } from './dto/update-fetus-standard.dto';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 @Controller('admin/fetus-standard')
+@UseGuards(AdminGuard)
 export class FetusStandardController {
   constructor(private readonly fetusStandardService: FetusStandardService) { }
 

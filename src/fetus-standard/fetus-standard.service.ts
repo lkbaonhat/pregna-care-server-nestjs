@@ -30,7 +30,7 @@ export class FetusStandardService {
   async findAll(page: number, limit: number) {
     const result = await this.userModel
       .find()
-      .select('name unit');
+      .select('name unit createdAt');
 
     const total = result.length;
     const startIndex = (page - 1) * limit;
@@ -38,7 +38,7 @@ export class FetusStandardService {
 
     return {
       data: {
-        paginatedResult,
+        data: paginatedResult,
         pagination: {
           total: total,
           page: page,

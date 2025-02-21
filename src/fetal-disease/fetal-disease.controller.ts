@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, NotFoundException, Query, UseGuards } from '@nestjs/common';
 import { FetalDiseaseService } from './fetal-disease.service';
 import { CreateFetalDiseaseDto } from './dto/create-fetal-disease.dto';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 
 @Controller('admin/fetal-disease')
+@UseGuards(AdminGuard)
 export class FetalDiseaseController {
   constructor(private readonly fetalDiseaseService: FetalDiseaseService) { }
 
