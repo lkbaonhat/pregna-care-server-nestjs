@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Membership Plan Confirmation</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(90deg, #ee7a7a 0%, #acbcf7 100%);
+    "
+  >
+    <table
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      width="100%"
+      style="
+        min-width: 100%;
+        background: linear-gradient(90deg, #ee7a7a 0%, #acbcf7 100%);
+      "
+    >
+      <tr>
+        <td align="center" style="padding: 40px 0">
+          <table
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            width="600"
+            style="
+              max-width: 600px;
+              background-color: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            "
+          >
+            <tr>
+              <td style="padding: 40px">
+                <h1
+                  style="
+                    color: #333333;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                    text-align: center;
+                  "
+                >
+                  Membership Confirmed!
+                </h1>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                  "
+                >
+                  Dear <%= locals.email %>,
+                </p>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                  "
+                >
+                  We're excited to confirm your membership plan! Your
+                  subscription is now active, and you can start enjoying all the
+                  benefits right away.
+                </p>
+                <table
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  width="100%"
+                  style="
+                    background-color: #f0f7ff;
+                    border-radius: 4px;
+                    margin-bottom: 20px;
+                  "
+                >
+                  <tr>
+                    <td style="padding: 20px">
+                      <h2
+                        style="
+                          color: #333333;
+                          font-size: 18px;
+                          margin-bottom: 10px;
+                        "
+                      >
+                        Membership Details:
+                      </h2>
+                      <p style="color: #666666; font-size: 14px; margin: 5px 0">
+                        <strong>Plan Type:</strong> <%= locals.membershipType %>
+                      </p>
+                      <p style="color: #666666; font-size: 14px; margin: 5px 0">
+                        <strong>Next Renewal Date:</strong> <%= locals.dueDate
+                        %>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                  "
+                >
+                  To access your membership benefits, simply log in to your
+                  account on our website or mobile app.
+                </p>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                  "
+                >
+                  If you have any questions about your membership or need
+                  assistance, our support team is always here to help. Don't
+                  hesitate to reach out!
+                </p>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                  "
+                >
+                  Thank you for choosing <%= companyName %>. We're thrilled to
+                  have you as a member!
+                </p>
+                <p
+                  style="
+                    color: #666666;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    margin-bottom: 0;
+                  "
+                >
+                  Best regards,<br />
+                  The SWD Team
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

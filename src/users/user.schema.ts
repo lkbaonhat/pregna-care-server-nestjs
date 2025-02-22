@@ -6,6 +6,7 @@ import { EMPTY_STRING } from '../constants/core';
 import { hashPasswordHelper } from '../utils/helper';
 import { MembershipDocument, MembershipSchema } from './membership.schema';
 import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
+import { Payment, PaymentSchema } from 'src/payments/payment.schema';
 
 @Schema({
   toJSON: {
@@ -95,6 +96,9 @@ export class User {
 
   @Prop({ type: String, default: 'Unknown' })
   nationality: string;
+
+  @Prop({ type: [PaymentSchema], default: [] })
+  transactions: Payment[];
 }
 
 export type UserDocument = HydratedDocument<User>;

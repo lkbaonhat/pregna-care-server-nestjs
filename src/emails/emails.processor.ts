@@ -24,6 +24,9 @@ export class EmailsProcessor extends WorkerHost {
       case 'payment-success':
         await this.sendPaymentSuccess(job);
         break;
+      case 'membership-plan-confirm':
+        await this.sendMembershipPlanConfirm(job);
+        break;
       default:
         break;
     }
@@ -64,6 +67,13 @@ export class EmailsProcessor extends WorkerHost {
     await this.sendMail(job, {
       subject: 'Payment successful',
       template: 'payment-success-email',
+    });
+  }
+
+  async sendMembershipPlanConfirm(job: Job<Mail>) {
+    await this.sendMail(job, {
+      subject: 'Membership plan confirmed',
+      template: 'membership-plan-confirm-email',
     });
   }
 }

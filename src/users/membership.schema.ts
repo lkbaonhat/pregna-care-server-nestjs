@@ -15,10 +15,10 @@ import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
 })
 export class Membership {
   @Prop({
-    type: Date,
+    type: Number,
     default: null,
   })
-  dueDate: Date | null;
+  dueDate: number | null; // seconds
 
   @Prop({
     type: String,

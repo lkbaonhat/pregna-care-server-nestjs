@@ -36,7 +36,7 @@ export class PremiumGuard implements CanActivate {
     const dueDate = user.membership.dueDate;
     if (!dueDate) return false;
 
-    const currentDate = new Date();
+    const currentDate = new Date().getTime() / 1000;
     if (currentDate > dueDate) return false;
 
     return true;

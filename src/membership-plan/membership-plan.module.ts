@@ -12,5 +12,6 @@ import { MembershipPlan, MembershipPlanSchema } from './membership-plan.schema';
   ],
   controllers: [MembershipPlanController],
   providers: [MembershipPlanService],
+  exports: [MembershipPlanService],
 })
 export class MembershipPlanModule {}

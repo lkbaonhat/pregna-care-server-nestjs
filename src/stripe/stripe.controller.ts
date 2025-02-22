@@ -6,8 +6,10 @@ import { Response } from 'src/types/core';
 import { StripeService } from './stripe.service';
 import { UserDocument } from 'src/users/user.schema';
 import { PaymentIntentRequestDto } from './dtos/payment-intent-request.dto';
-import { AttachPaymentMethodDto } from './dtos/attach-payment-method-dto';
+import { AttachPaymentMethodDto } from './dtos/attach-payment-method.dto';
 import { ConfirmPaymentIntentRequestDto } from './dtos/confirm-payment-intent-request.dto';
+import { MembershipPlanRequestDto } from './dtos/membership-plan-request.dto';
+import { ConfirmMembershipPlanRequestDto } from './dtos/confirm-membership-plan-request.dto';
 
 @ApiBearerAuth()
 @Controller('payments/stripe')
@@ -49,6 +51,32 @@ export class StripeController {
     @Body() body: ConfirmPaymentIntentRequestDto,
   ): Promise<Response> {
     const data = await this.stripeService.confirmPaymentIntent(body);
+    return { data };
+  }
+
+  @Post('payment-intent/membership-plan')
+  async createMembershipPlanPaymentIntent(
+    @Req() req: Request,
+    @Body() body: MembershipPlanRequestDto,
+  ): Promise<Response> {
+    const user = req.user as UserDocument;
+    const data = await this.stripeService.createMembershipPlanPaymentIntent(
+      user,
+      body,
+    );
+    return { data };
+  }
+
+  @Post('payment-intent/membership-plan/confirm')
+  async confirmMembershipPlanPaymentIntent(
+    @Req() req: Request,
+    @Body() body: ConfirmMembershipPlanRequestDto,
+  ): Promise<Response> {
+    const user = req.user as UserDocument;
+    const data = await this.stripeService.confirmMembershipPlanPaymentIntent(
+      user,
+      body,
+    );
     return { data };
   }
 }

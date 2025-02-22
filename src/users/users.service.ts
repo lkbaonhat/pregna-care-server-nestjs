@@ -6,8 +6,11 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { User } from './user.schema';
+import { User, UserDocument } from './user.schema';
 import { hashPasswordHelper } from 'src/utils/helper';
+import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
+import { MembershipDocument } from './membership.schema';
+import { PaymentDocument } from 'src/payments/payment.schema';
 
 @Injectable()
 export class UsersService {
@@ -76,5 +79,38 @@ export class UsersService {
     await this.userModel.findByIdAndUpdate(userId, {
       password: hashedPassword,
     });
+  }
+
+  async updateMembership(user: UserDocument, plan: MembershipPlanTypes) {
+    const now = new Date().getTime() / 1000;
+    let newDueDate: number | null = null;
+    if (plan === MembershipPlanTypes.Freemium)
+      newDueDate = now + 60 * 60 * 24 * 3; // 3 days
+    if (plan === MembershipPlanTypes.OneMonth)
+      newDueDate = now + 60 * 60 * 24 * 30; // 30 days
+    user.membership = {
+      plan,
+      dueDate: newDueDate,
+    } as MembershipDocument;
+
+    await user.save();
+
+    return user;
+  }
+
+  async cancelMembership(user: UserDocument) {
+    await this.userModel.findByIdAndUpdate(user._id, {
+      membership: {
+        plan: MembershipPlanTypes.Free,
+        dueDate: null,
+      },
+    });
+  }
+
+  async addTransaction(user: UserDocument, payment: PaymentDocument) {
+    const { userId, ...data } = payment;
+    user.transactions.push(data);
+    await user.save();
+    return user;
   }
 }

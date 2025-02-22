@@ -15,7 +15,7 @@ import { UsersService } from './users.service';
 import { ParseMongoIdPipe } from 'src/pipes/parse-mongo-id.pipe';
 import { Response } from 'src/types/core';
 import { Request } from 'express';
-import { User } from './user.schema';
+import { User, UserDocument } from './user.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 
 @Controller('users')
@@ -43,6 +43,13 @@ export class UsersController {
   @Get('self')
   getSelf(@Req() req: Request): Response {
     return { data: req.user };
+  }
+
+  @Delete('membership')
+  async cancelMembership(@Req() req: Request): Promise<Response> {
+    const user = req.user as UserDocument;
+    const result = await this.usersService.cancelMembership(user);
+    return { data: result };
   }
 
   @Get(':id')

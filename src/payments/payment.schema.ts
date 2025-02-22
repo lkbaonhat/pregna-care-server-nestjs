@@ -45,9 +45,9 @@ export class Payment {
 
   @Prop({
     type: String,
-    required: true,
+    default: null,
   })
-  currency: string;
+  currency: string | null;
 
   @Prop({
     type: [String],
