@@ -247,9 +247,9 @@ export class StripeService {
 
   async confirmMembershipPlanIntent(
     user: UserDocument,
-    { intentId, paymentMethodId }: ConfirmMembershipPlanRequestDto,
+    { intent, paymentMethod }: ConfirmMembershipPlanRequestDto,
   ) {
-    const payment = await this.paymentsService.findByPaymentIntentId(intentId);
+    const payment = await this.paymentsService.findByPaymentIntentId(intent);
     if (!payment) throw new BadRequestException('Payment not found');
 
     const {
@@ -261,12 +261,12 @@ export class StripeService {
 
     const result =
       type === MembershipPlanTypes.Freemium
-        ? await this.stripe.setupIntents.confirm(intentId, {
-            payment_method: paymentMethodId,
+        ? await this.stripe.setupIntents.confirm(intent, {
+            payment_method: paymentMethod,
             return_url,
           })
-        : await this.stripe.paymentIntents.confirm(intentId, {
-            payment_method: paymentMethodId,
+        : await this.stripe.paymentIntents.confirm(intent, {
+            payment_method: paymentMethod,
             return_url,
           });
 

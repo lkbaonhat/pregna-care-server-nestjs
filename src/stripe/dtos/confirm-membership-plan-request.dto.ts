@@ -4,9 +4,9 @@ import { IsString } from 'class-validator';
 export class ConfirmMembershipPlanRequestDto {
   @ApiProperty()
   @IsString()
-  intentId: string;
+  intent: string;
 
   @ApiProperty()
   @IsString()
-  paymentMethodId: string;
+  paymentMethod: string;
 }
