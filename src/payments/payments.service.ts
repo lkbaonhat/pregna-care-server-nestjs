@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { Payment } from './payment.schema';
+import { Payment, PaymentDocument } from './payment.schema';
+import { PaymentIntentStatus } from './types/payment-intent-status';
 
 @Injectable()
 export class PaymentsService {
@@ -28,5 +29,10 @@ export class PaymentsService {
 
   async create(data: Partial<Payment>) {
     return this.paymentModel.create(data);
+  }
+
+  async updateStatus(payment: PaymentDocument, status: PaymentIntentStatus) {
+    payment.status = status;
+    return payment.save();
   }
 }

@@ -39,7 +39,7 @@ export class MembershipPlan {
     type: Boolean,
     default: false,
   })
-  isActive: boolean;
+  isActive?: boolean;
   @Prop({
     type: [String],
     default: [],

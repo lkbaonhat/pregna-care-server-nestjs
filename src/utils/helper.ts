@@ -14,6 +14,6 @@ export const comparePasswordHelper = (
 
 export const isMembershipExpired = (dueDate: number | null) => {
   if (!dueDate) return false;
-  const now = new Date().getTime() / 1000;
-  return dueDate <= now;
+  const now = Math.round(new Date().getTime() / 1000);
+  return dueDate < now;
 };

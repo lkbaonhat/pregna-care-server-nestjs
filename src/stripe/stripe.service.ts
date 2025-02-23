@@ -21,6 +21,9 @@ import { ConfirmMembershipPlanRequestDto } from './dtos/confirm-membership-plan-
 import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
 import { formatDateFromSeconds } from 'src/utils/date';
 import { UsersService } from 'src/users/users.service';
+import { EMPTY_STRING } from 'src/constants/core';
+import { MembershipPlanIntentMetadata } from './types/core';
+import { PaymentDocument } from 'src/payments/payment.schema';
 
 @Injectable()
 export class StripeService {
@@ -157,7 +160,7 @@ export class StripeService {
     return result;
   }
 
-  async createMembershipPlanPaymentIntent(
+  async createMembershipPlanIntent(
     user: UserDocument,
     { plan, paymentMethod }: MembershipPlanRequestDto,
   ) {
@@ -179,100 +182,129 @@ export class StripeService {
     if (
       user.membership.plan === MembershipPlanTypes.Lifetime ||
       (user.membership.plan === MembershipPlanTypes.OneMonth &&
-        isMembershipExpired(user.membership.dueDate)) ||
+        !isMembershipExpired(user.membership.dueDate)) ||
       (user.membership.plan === MembershipPlanTypes.Freemium &&
-        isMembershipExpired(user.membership.dueDate))
+        !isMembershipExpired(user.membership.dueDate))
     )
       throw new BadRequestException('User still in membership');
 
-    // If requested membership plan is freemium, then create setup intent for future payment
+    // create intent
+    const description = `Membership plan ${requestedMembershipPlan.name}`;
+    let intent: Stripe.SetupIntent | Stripe.PaymentIntent;
+    let paymentDocument: PaymentDocument;
     if (requestedMembershipPlan.type === MembershipPlanTypes.Freemium) {
-      const setupIntent = await this.stripe.setupIntents.create({
+      intent = (await this.stripe.setupIntents.create({
         customer: user.stripeCustomerId,
         payment_method: paymentMethod,
-      });
+        description,
+      })) as Stripe.SetupIntent;
 
-      await this.paymentsService.create({
+      paymentDocument = await this.paymentsService.create({
         userId: user._id,
-        stripeId: setupIntent.id,
-        stripeObject: setupIntent.object,
+        stripeId: intent.id,
+        stripeObject: intent.object,
         amount: 0,
-        paymentMethodTypes: setupIntent.payment_method_types,
-        status: setupIntent.status,
+        paymentMethodTypes: intent.payment_method_types,
+        status: intent.status,
+      });
+    } else {
+      intent = (await this.stripe.paymentIntents.create({
+        amount: requestedMembershipPlan.price * 100,
+        currency: 'usd',
+        customer: user.stripeCustomerId,
+        payment_method: paymentMethod,
+        confirmation_method: 'manual',
+        description,
+        metadata: {
+          membershipId: requestedMembershipPlan._id.toString(),
+          membershipName: requestedMembershipPlan.name,
+          membershipType: requestedMembershipPlan.type,
+          membershipPrice: requestedMembershipPlan.price,
+        },
+      })) as Stripe.PaymentIntent;
+
+      const requestedMembershipPlanData = requestedMembershipPlan.toObject();
+      delete requestedMembershipPlanData.isActive;
+
+      paymentDocument = await this.paymentsService.create({
+        userId: user._id,
+        stripeId: intent.id,
+        stripeObject: intent.object,
+        amount: intent.amount / 100,
+        currency: intent.currency,
+        paymentMethodTypes: intent.payment_method_types,
+        status: intent.status,
+        metadata: {
+          membership: requestedMembershipPlan,
+        } as MembershipPlanIntentMetadata,
       });
     }
 
-    const amount = requestedMembershipPlan.price * 100;
-    const description = `Membership plan ${requestedMembershipPlan.name}`;
-
-    const paymentIntent = await this.stripe.paymentIntents.create({
-      amount,
-      currency: 'usd',
-      customer: user.stripeCustomerId,
-      payment_method: paymentMethod,
-      confirmation_method: 'manual',
-      description,
-    });
-
-    await this.paymentsService.create({
-      userId: user._id,
-      stripeId: paymentIntent.id,
-      stripeObject: paymentIntent.object,
-      amount: paymentIntent.amount,
-      currency: paymentIntent.currency,
-      paymentMethodTypes: paymentIntent.payment_method_types,
-      status: paymentIntent.status,
-    });
-
-    return paymentIntent;
+    // add to user transactions
+    await this.usersService.addTransaction(user, paymentDocument);
+    return intent;
   }
 
-  async confirmMembershipPlanPaymentIntent(
+  async confirmMembershipPlanIntent(
     user: UserDocument,
-    { paymentIntentId, paymentMethodId, plan }: ConfirmMembershipPlanRequestDto,
+    { intentId, paymentMethodId }: ConfirmMembershipPlanRequestDto,
   ) {
-    const payment =
-      await this.paymentsService.findByPaymentIntentId(paymentIntentId);
+    const payment = await this.paymentsService.findByPaymentIntentId(intentId);
     if (!payment) throw new BadRequestException('Payment not found');
 
-    const updatedMembershipPlan =
-      await this.membershipPlanService.findOne(plan);
-    if (!updatedMembershipPlan)
-      throw new BadRequestException('Membership plan not found');
+    const {
+      membership: { type },
+    } = payment.metadata as MembershipPlanIntentMetadata;
 
+    // confirm intent
     const return_url = `${this.configService.getOrThrow<string>('EMAIL_CONFIRMATION_URL')}/payments/${payment._id.toString()}/result`;
 
-    const result = await this.stripe.paymentIntents.confirm(paymentMethodId, {
-      payment_method: paymentMethodId,
-      return_url,
-    });
+    const result =
+      type === MembershipPlanTypes.Freemium
+        ? await this.stripe.setupIntents.confirm(intentId, {
+            payment_method: paymentMethodId,
+            return_url,
+          })
+        : await this.stripe.paymentIntents.confirm(intentId, {
+            payment_method: paymentMethodId,
+            return_url,
+          });
 
     // update payment status
-    payment.status = result.status;
-    await payment.save();
+    const updatedPayment = await this.paymentsService.updateStatus(
+      payment,
+      result.status,
+    );
+    // update payment in user transactions
+    await this.usersService.updateTransaction(user, updatedPayment);
 
     // update user membership
-    const updatedUser = await this.usersService.updateMembership(
-      user,
-      updatedMembershipPlan.type,
-    );
+    const updatedUser = await this.usersService.updateMembership(user, type);
 
+    // send mail
     const paymentPopulated = await payment.populate<{ userId: User }>('userId');
     const email = paymentPopulated.userId.email;
     const paymentDateFormat = formatDateFromSeconds(result.created);
     const dueDateFormat = updatedUser.membership.dueDate
       ? formatDateFromSeconds(updatedUser.membership.dueDate)
       : 'none';
+    let amount = 0;
+    if ('amount' in result) {
+      amount = result.amount / 100;
+    }
+    let currency = EMPTY_STRING;
+    if ('currency' in result) {
+      currency = result.currency.toUpperCase();
+    }
 
-    // send mail
     if (result.status === 'succeeded') {
       // payment success email
       await this.emailsService.sendPaymentSuccessEmail({
         to: email,
         data: {
           email,
-          amount: result.amount,
-          currency: result.currency.toUpperCase(),
+          amount,
+          currency,
           transactionId: result.id,
           paymentDate: paymentDateFormat,
         },
@@ -283,7 +315,7 @@ export class StripeService {
         to: email,
         data: {
           email,
-          membershipType: updatedMembershipPlan.type,
+          membershipType: type,
           dueDate: dueDateFormat,
         },
       });

@@ -1,16 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class ConfirmMembershipPlanRequestDto {
   @ApiProperty()
   @IsString()
-  paymentIntentId: string;
-
-  @ApiProperty()
-  @IsMongoId()
-  paymentMethodId: string;
+  intentId: string;
 
   @ApiProperty()
   @IsString()
-  plan: string;
+  paymentMethodId: string;
 }

@@ -54,26 +54,26 @@ export class StripeController {
     return { data };
   }
 
-  @Post('payment-intent/membership-plan')
+  @Post('intent/membership-plan')
   async createMembershipPlanPaymentIntent(
     @Req() req: Request,
     @Body() body: MembershipPlanRequestDto,
   ): Promise<Response> {
     const user = req.user as UserDocument;
-    const data = await this.stripeService.createMembershipPlanPaymentIntent(
+    const data = await this.stripeService.createMembershipPlanIntent(
       user,
       body,
     );
     return { data };
   }
 
-  @Post('payment-intent/membership-plan/confirm')
+  @Post('intent/membership-plan/confirm')
   async confirmMembershipPlanPaymentIntent(
     @Req() req: Request,
     @Body() body: ConfirmMembershipPlanRequestDto,
   ): Promise<Response> {
     const user = req.user as UserDocument;
-    const data = await this.stripeService.confirmMembershipPlanPaymentIntent(
+    const data = await this.stripeService.confirmMembershipPlanIntent(
       user,
       body,
     );

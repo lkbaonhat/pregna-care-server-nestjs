@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 
-import { User } from 'src/users/user.schema';
 import { PaymentIntentStatus } from './types/payment-intent-status';
 
 @Schema({
@@ -19,10 +18,10 @@ import { PaymentIntentStatus } from './types/payment-intent-status';
 export class Payment {
   @Prop({
     type: SchemaTypes.ObjectId,
-    ref: User.name,
+    ref: 'User',
     required: true,
   })
-  userId: Types.ObjectId;
+  userId?: Types.ObjectId;
 
   @Prop({
     type: String,
@@ -60,6 +59,12 @@ export class Payment {
     required: true,
   })
   status: PaymentIntentStatus;
+
+  @Prop({
+    type: SchemaTypes.Mixed,
+    default: {},
+  })
+  metadata?: Record<string, any>;
 }
 
 export type PaymentDocument = HydratedDocument<Payment>;

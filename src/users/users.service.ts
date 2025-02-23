@@ -82,7 +82,7 @@ export class UsersService {
   }
 
   async updateMembership(user: UserDocument, plan: MembershipPlanTypes) {
-    const now = new Date().getTime() / 1000;
+    const now = Math.round(new Date().getTime() / 1000);
     let newDueDate: number | null = null;
     if (plan === MembershipPlanTypes.Freemium)
       newDueDate = now + 60 * 60 * 24 * 3; // 3 days
@@ -108,9 +108,23 @@ export class UsersService {
   }
 
   async addTransaction(user: UserDocument, payment: PaymentDocument) {
-    const { userId, ...data } = payment;
-    user.transactions.push(data);
-    await user.save();
-    return user;
+    delete payment.userId;
+    // Add transaction to user
+    user.transactions.push(payment);
+    return user.save();
+  }
+
+  async updateTransaction(user: UserDocument, payment: PaymentDocument) {
+    // Find and update transaction
+    const transactionIndex = user.transactions.findIndex(
+      (transaction) => transaction._id.toString() === payment._id.toString(),
+    );
+    if (transactionIndex === -1) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    delete payment.userId;
+    user.transactions[transactionIndex] = payment;
+    return user.save();
   }
 }
