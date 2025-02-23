@@ -59,6 +59,8 @@ export class UsersController {
   }
 
   // TODO: Add another route to update only password
+  // TODO: Prevent updating email, password, membership, stripeCustomerId,
+  // role, status, transactions
   @Put(':id')
   async updateUser(
     @Param('id', ParseMongoIdPipe) id: string,
