@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Get, Query, Put, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  Put,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { FetusStandardService } from './fetus-standard.service';
 import { CreateFetusStandardDto } from './dto/create-fetus-standard.dto';
 import { UpdateFetusStandardDto } from './dto/update-fetus-standard.dto';
@@ -7,12 +17,12 @@ import { AdminGuard } from 'src/guards/admin.guard';
 @Controller('admin/fetus-standard')
 @UseGuards(AdminGuard)
 export class FetusStandardController {
-  constructor(private readonly fetusStandardService: FetusStandardService) { }
+  constructor(private readonly fetusStandardService: FetusStandardService) {}
 
   @Get('/find-all')
   async findAll(
     @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
+    @Query('limit') limit: number = 10,
   ) {
     return this.fetusStandardService.findAll(page, limit);
   }
@@ -24,9 +34,16 @@ export class FetusStandardController {
     @Query('maxWeek') maxWeek: number,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('isDeleted') isDeleted: boolean = false
+    @Query('isDeleted') isDeleted: boolean = false,
   ) {
-    return this.fetusStandardService.findFetusStandardByNameAndWeek(name, +minWeek, +maxWeek, page, limit, isDeleted);
+    return this.fetusStandardService.findFetusStandardByNameAndWeek(
+      name,
+      +minWeek,
+      +maxWeek,
+      page,
+      limit,
+      isDeleted,
+    );
   }
 
   @Get('/search')
@@ -40,7 +57,10 @@ export class FetusStandardController {
   }
 
   @Put('/update/id=:id')
-  update(@Body() updatedFetusStandard: UpdateFetusStandardDto, @Param('id') id: string) {
+  update(
+    @Body() updatedFetusStandard: UpdateFetusStandardDto,
+    @Param('id') id: string,
+  ) {
     return this.fetusStandardService.update(updatedFetusStandard, id);
   }
 

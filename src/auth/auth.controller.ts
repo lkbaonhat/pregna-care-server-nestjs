@@ -18,7 +18,10 @@ import { Response } from 'src/types/core';
 import { Public } from 'src/constants/core';
 import { ConfirmEmailDto } from './dtos/confirm-email.dto';
 import { GoogleAuthGuard } from 'src/guards/google-auth/google-auth.guard';
-import { RequestResetPasswordDto, ResetPasswordDto } from './dtos/reset-password.dto';
+import {
+  RequestResetPasswordDto,
+  ResetPasswordDto,
+} from './dtos/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -49,7 +52,7 @@ export class AuthController {
     const result = this.authService.signin(req.user!);
     return { data: result, message: 'User signed in' };
   }
-  
+
   //Login with google
   @Public()
   @UseGuards(GoogleAuthGuard)
@@ -64,10 +67,12 @@ export class AuthController {
     res.redirect(`http://localhost:3000?accessToken=${response.accessToken}`);
     return { data: null };
   }
-  
+
   @Post('request-reset-password')
   @Public()
-  async requestResetPassword(@Body() body: RequestResetPasswordDto): Promise<Response> {
+  async requestResetPassword(
+    @Body() body: RequestResetPasswordDto,
+  ): Promise<Response> {
     const result = await this.authService.requestPasswordReset(body.email);
     return { data: result, message: 'Reset password email sent' };
   }
@@ -75,7 +80,10 @@ export class AuthController {
   @Post('reset-password')
   @Public()
   async resetPassword(@Body() body: ResetPasswordDto): Promise<Response> {
-    const result = await this.authService.resetPassword(body.token, body.newPassword);
+    const result = await this.authService.resetPassword(
+      body.token,
+      body.newPassword,
+    );
     return { data: result, message: 'Password reset successful' };
   }
 }

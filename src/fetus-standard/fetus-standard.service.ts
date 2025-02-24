@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateFetusStandardDto } from './dto/create-fetus-standard.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { FetusStandard } from './entities/fetus-standard.entity';
@@ -7,10 +11,9 @@ import { UpdateFetusStandardDto } from './dto/update-fetus-standard.dto';
 
 @Injectable()
 export class FetusStandardService {
-
   constructor(
-    @InjectModel(FetusStandard.name) private userModel: Model<FetusStandard>
-  ) { }
+    @InjectModel(FetusStandard.name) private userModel: Model<FetusStandard>,
+  ) {}
 
   //#region findOneStandardByName
   async findOneStandardByName(name: string) {
@@ -28,9 +31,7 @@ export class FetusStandardService {
 
   //#region find all fetus standard
   async findAll(page: number, limit: number) {
-    const result = await this.userModel
-      .find()
-      .select('name unit createdAt');
+    const result = await this.userModel.find().select('name unit createdAt');
 
     const total = result.length;
     const startIndex = (page - 1) * limit;
@@ -44,32 +45,48 @@ export class FetusStandardService {
           page: page,
           limit: limit,
           totalPages: Math.ceil(total / limit),
-        }
-      }
+        },
+      },
     };
   }
   //#endregion
 
   //#region find fetus standard by name and week
-  async findFetusStandardByNameAndWeek(name: string, minWeek: number, maxWeek: number, page: number, limit: number, isDeleted: boolean) {
+  async findFetusStandardByNameAndWeek(
+    name: string,
+    minWeek: number,
+    maxWeek: number,
+    page: number,
+    limit: number,
+    isDeleted: boolean,
+  ) {
     try {
-      const result = await this.userModel.findOne({ name: name, isDeleted: isDeleted });
+      const result = await this.userModel.findOne({
+        name: name,
+        isDeleted: isDeleted,
+      });
 
-      const min = minWeek && !isNaN(Number(minWeek)) ? Number(minWeek) : undefined;
-      const max = maxWeek && !isNaN(Number(maxWeek)) ? Number(maxWeek) : undefined;
+      const min =
+        minWeek && !isNaN(Number(minWeek)) ? Number(minWeek) : undefined;
+      const max =
+        maxWeek && !isNaN(Number(maxWeek)) ? Number(maxWeek) : undefined;
 
       let filteredWeeks = result?.weeks;
       if (min !== undefined && max !== undefined) {
-        filteredWeeks = result?.weeks.filter(week => week.week >= min && week.week <= max);
+        filteredWeeks = result?.weeks.filter(
+          (week) => week.week >= min && week.week <= max,
+        );
       } else if (min !== undefined) {
-        filteredWeeks = result?.weeks.filter(week => week.week >= min);
+        filteredWeeks = result?.weeks.filter((week) => week.week >= min);
       } else if (max !== undefined) {
-        filteredWeeks = result?.weeks.filter(week => week.week <= max);
+        filteredWeeks = result?.weeks.filter((week) => week.week <= max);
       }
 
       const total = filteredWeeks ? filteredWeeks.length : 0;
       const startIndex = (page - 1) * limit;
-      const paginatedWeeks = filteredWeeks ? filteredWeeks.slice(startIndex, startIndex + limit) : [];
+      const paginatedWeeks = filteredWeeks
+        ? filteredWeeks.slice(startIndex, startIndex + limit)
+        : [];
 
       return {
         data: {
@@ -81,8 +98,8 @@ export class FetusStandardService {
             page: page,
             limit: limit,
             totalPages: Math.ceil(total / limit),
-          }
-        }
+          },
+        },
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -93,17 +110,19 @@ export class FetusStandardService {
   }
   //#endregion
 
-  //#region Search 
+  //#region Search
   async search(name: string) {
     const regex = new RegExp(name, 'i');
-    const result = await this.userModel.find({ name: regex }).select('name unit');
+    const result = await this.userModel
+      .find({ name: regex })
+      .select('name unit');
 
     if (!result || result.length === 0) {
       throw new NotFoundException(`No data found for name ${name}`);
     }
 
     return {
-      data: result
+      data: result,
     };
   }
   //#endregion
@@ -111,29 +130,34 @@ export class FetusStandardService {
   //#region Create FetusStandard
   async create(createFetusStandardDto: CreateFetusStandardDto) {
     try {
-      const isFetusExist = await this.findOneStandardByName(createFetusStandardDto.name);
+      const isFetusExist = await this.findOneStandardByName(
+        createFetusStandardDto.name,
+      );
 
       if (isFetusExist) {
         const duplicateWeeks = createFetusStandardDto.weeks
-          .filter(week => isFetusExist.weeks.some(w => w.week === week.week))
-          .map(w => w.week);
+          .filter((week) =>
+            isFetusExist.weeks.some((w) => w.week === week.week),
+          )
+          .map((w) => w.week);
 
         if (duplicateWeeks.length > 0) {
-          throw new ConflictException(`Week ${duplicateWeeks.join(', ')} already exist for ${createFetusStandardDto.name}`);
+          throw new ConflictException(
+            `Week ${duplicateWeeks.join(', ')} already exist for ${createFetusStandardDto.name}`,
+          );
         }
 
         // Add new weeks to existing fetus standard
         isFetusExist.weeks.push(...createFetusStandardDto.weeks);
         isFetusExist.save();
         return {
-          data: isFetusExist
+          data: isFetusExist,
         };
-
       } else {
         const createdFetusStandard = new this.userModel(createFetusStandardDto);
         createdFetusStandard.save();
         return {
-          data: createdFetusStandard
+          data: createdFetusStandard,
         };
       }
     } catch (error) {
@@ -154,10 +178,10 @@ export class FetusStandardService {
       }
 
       Object.keys(createFetusStandardDto).forEach((key) => {
-        if (key === "weeks" && Array.isArray(createFetusStandardDto.weeks)) {
+        if (key === 'weeks' && Array.isArray(createFetusStandardDto.weeks)) {
           createFetusStandardDto.weeks.forEach((newWeek) => {
             const existingWeekIndex = existingFetusStandard.weeks.findIndex(
-              (week) => week.week === newWeek.week
+              (week) => week.week === newWeek.week,
             );
 
             if (existingWeekIndex !== -1) {
@@ -191,8 +215,8 @@ export class FetusStandardService {
     try {
       const updatedFetusStandard = await this.userModel.findByIdAndUpdate(
         id,
-        [{ $set: { isDeleted: { $not: "$isDeleted" } } }],
-        { new: true }
+        [{ $set: { isDeleted: { $not: '$isDeleted' } } }],
+        { new: true },
       );
 
       if (!updatedFetusStandard) {
@@ -202,9 +226,9 @@ export class FetusStandardService {
         data: {
           _id: updatedFetusStandard._id,
           name: updatedFetusStandard.name,
-          isDeleted: updatedFetusStandard.isDeleted
+          isDeleted: updatedFetusStandard.isDeleted,
         },
-        message: 'Deleted successfully'
+        message: 'Deleted successfully',
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -227,7 +251,7 @@ export class FetusStandardService {
         data: {
           id: deletedFetusStandard._id,
           name: deletedFetusStandard.name,
-        }
+        },
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
