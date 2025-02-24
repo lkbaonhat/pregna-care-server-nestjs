@@ -1,29 +1,20 @@
-import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
-import * as ejs from 'ejs';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
-import { getFullTemplatePath } from 'src/utils/mails';
+import { Mail } from './types/mail';
 
 @Injectable()
 export class EmailsService {
-  constructor(private mailService: MailerService) {}
+  constructor(@InjectQueue('emails') private readonly emailQueue: Queue) {}
 
-  async sendMail(to: string, subject: string, templateFile: string, data: any) {
-    const template = await ejs.renderFile(
-      getFullTemplatePath(templateFile),
-      data as ejs.Data,
-    );
-    this.mailService
-      .sendMail({
-        to,
-        subject,
-        html: template,
-      })
-      .then(() => {
-        console.log('Email sent');
-      })
-      .catch((error) => {
-        console.error('Error sending email', error);
-      });
+  async sendVerificationEmail(data: Mail) {
+    const job = await this.emailQueue.add('verification', data);
+    return job.id;
+  }
+
+  async sendResetPasswordEmail(data: Mail) {
+    const job = await this.emailQueue.add('reset-password', data);
+    return job.id;
   }
 }

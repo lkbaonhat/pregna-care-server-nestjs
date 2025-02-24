@@ -51,13 +51,15 @@
     <div class="container">
       <div class="content">
         <h1>Confirm Your Email</h1>
-        <p>Hello <%= name %>,</p>
+        <p>Hello <%= locals.name %>,</p>
         <p>
           Thank you for signing up! Please confirm your email address by
           clicking the button below:
         </p>
         <p style="text-align: center">
-          <a href="<%= confirmationLink %>" class="button">Confirm Email</a>
+          <a href="<%= locals.confirmationLink %>" class="button"
+            >Confirm Email</a
+          >
         </p>
         <p>
           If you didn't create an account with us, please ignore this email.

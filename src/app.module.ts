@@ -3,12 +3,15 @@ import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { BullModule } from '@nestjs/bullmq';
 
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { MembershipPlanModule } from './membership-plan/membership-plan.module';
+import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
+import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
 
 @Module({
   imports: [
@@ -22,6 +25,17 @@ import { MembershipPlanModule } from './membership-plan/membership-plan.module';
       }),
       inject: [ConfigService],
     }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+          password: configService.get<string>('REDIS_PASSWORD'),
+        },
+      }),
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -31,6 +45,8 @@ import { MembershipPlanModule } from './membership-plan/membership-plan.module';
     UsersModule,
     AuthModule,
     MembershipPlanModule,
+    FetusStandardModule,
+    FetalDiseaseModule,
   ],
   providers: [
     {
