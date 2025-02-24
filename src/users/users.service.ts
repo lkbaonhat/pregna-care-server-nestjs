@@ -6,12 +6,15 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { User } from './user.schema';
+import { User, UserDocument } from './user.schema';
 import { hashPasswordHelper } from 'src/utils/helper';
+import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
+import { MembershipDocument } from './membership.schema';
+import { PaymentDocument } from 'src/payments/payment.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private userModel: Model<User>) { }
+  constructor(@InjectModel('User') private userModel: Model<User>) {}
 
   create(email: string, password: string) {
     const user = new this.userModel({ email, password });
@@ -76,5 +79,52 @@ export class UsersService {
     await this.userModel.findByIdAndUpdate(userId, {
       password: hashedPassword,
     });
+  }
+
+  async updateMembership(user: UserDocument, plan: MembershipPlanTypes) {
+    const now = Math.round(new Date().getTime() / 1000);
+    let newDueDate: number | null = null;
+    if (plan === MembershipPlanTypes.Freemium)
+      newDueDate = now + 60 * 60 * 24 * 3; // 3 days
+    if (plan === MembershipPlanTypes.OneMonth)
+      newDueDate = now + 60 * 60 * 24 * 30; // 30 days
+    user.membership = {
+      plan,
+      dueDate: newDueDate,
+    } as MembershipDocument;
+
+    await user.save();
+
+    return user;
+  }
+
+  async cancelMembership(user: UserDocument) {
+    await this.userModel.findByIdAndUpdate(user._id, {
+      membership: {
+        plan: MembershipPlanTypes.Free,
+        dueDate: null,
+      },
+    });
+  }
+
+  async addTransaction(user: UserDocument, payment: PaymentDocument) {
+    delete payment.userId;
+    // Add transaction to user
+    user.transactions.push(payment);
+    return user.save();
+  }
+
+  async updateTransaction(user: UserDocument, payment: PaymentDocument) {
+    // Find and update transaction
+    const transactionIndex = user.transactions.findIndex(
+      (transaction) => transaction._id.toString() === payment._id.toString(),
+    );
+    if (transactionIndex === -1) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    delete payment.userId;
+    user.transactions[transactionIndex] = payment;
+    return user.save();
   }
 }

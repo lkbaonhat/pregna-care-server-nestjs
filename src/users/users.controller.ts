@@ -8,6 +8,7 @@ import {
   Put,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
@@ -15,13 +16,15 @@ import { UsersService } from './users.service';
 import { ParseMongoIdPipe } from 'src/pipes/parse-mongo-id.pipe';
 import { Response } from 'src/types/core';
 import { Request } from 'express';
-import { User } from './user.schema';
+import { User, UserDocument } from './user.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) { }
+  constructor(private usersService: UsersService) {}
 
+  @UseGuards(AdminGuard)
   @Get()
   async getAllUsers(
     @Query('page') page: number = 1,
@@ -31,6 +34,7 @@ export class UsersController {
     return { data: result };
   }
 
+  @UseGuards(AdminGuard)
   @Post()
   async createUser(@Body() body: CreateUserDto): Promise<Response> {
     const result = await this.usersService.createUserByAdmin(
@@ -45,13 +49,24 @@ export class UsersController {
     return { data: req.user };
   }
 
+  @Delete('membership')
+  async cancelMembership(@Req() req: Request): Promise<Response> {
+    const user = req.user as UserDocument;
+    const result = await this.usersService.cancelMembership(user);
+    return { data: result };
+  }
+
+  @UseGuards(AdminGuard)
   @Get(':id')
   async getUser(@Param('id', ParseMongoIdPipe) id: string): Promise<Response> {
     const result = await this.usersService.findById(id);
     return { data: result };
   }
 
-  // TODO: Add another route to update only password
+  // TODO: Add User route to update only password
+  // TODO: Add User route to upload avatar
+  // TODO: Add User route to update bloodType, nationality, phoneNumber, firstName, lastName, dateOfBirth
+  @UseGuards(AdminGuard)
   @Put(':id')
   async updateUser(
     @Param('id', ParseMongoIdPipe) id: string,
@@ -61,6 +76,7 @@ export class UsersController {
     return { data: result };
   }
 
+  @UseGuards(AdminGuard)
   @Delete(':id')
   async deleteUser(
     @Param('id', ParseMongoIdPipe) id: string,
