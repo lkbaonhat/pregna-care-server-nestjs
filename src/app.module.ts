@@ -7,9 +7,11 @@ import { BullModule } from '@nestjs/bullmq';
 
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { StripeModule } from './stripe/stripe.module';
+import { MembershipPlanModule } from './membership-plan/membership-plan.module';
 import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
-import { MembershipPlanModule } from './membership-plan/membership-plan.module';
+import { PaymentsModule } from './payments/payments.module';
 import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
 import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
 
@@ -45,6 +47,8 @@ import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
     UsersModule,
     AuthModule,
     MembershipPlanModule,
+    PaymentsModule,
+    StripeModule,
     FetusStandardModule,
     FetalDiseaseModule,
   ],

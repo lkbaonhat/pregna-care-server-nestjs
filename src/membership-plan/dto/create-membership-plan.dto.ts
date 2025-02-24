@@ -1,27 +1,36 @@
-import { IsString, IsNumber, IsBoolean, IsArray, IsOptional, Min, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+  IsOptional,
+  Min,
+  MaxLength,
+  IsEnum,
+} from 'class-validator';
+import { MembershipPlanTypes } from '../types/membership-plan';
 
 export class CreateMembershipPlanDto {
-    @IsString()
-    @MaxLength(100)
-    name: string;
+  @IsString()
+  @MaxLength(100)
+  name: string;
 
-    @IsNumber()
-    @Min(0)
-    price: number;
+  @IsNumber()
+  @Min(0)
+  price: number;
 
-    @IsNumber()
-    @Min(0)
-    duration: number;
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  description: string;
 
-    @IsString()
-    @IsOptional()
-    @MaxLength(500)
-    description: string;
+  @IsEnum(MembershipPlanTypes)
+  type: string;
 
-    @IsBoolean()
-    isActive: boolean;
+  @IsBoolean()
+  isActive: boolean;
 
-    @IsArray()
-    @IsString({ each: true })
-    benefits: string[];
+  @IsArray()
+  @IsString({ each: true })
+  benefits: string[];
 }

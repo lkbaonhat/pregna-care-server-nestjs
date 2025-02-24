@@ -11,3 +11,9 @@ export const comparePasswordHelper = (
 ) => {
   return bcrypt.compare(plainPassword, hashPassword);
 };
+
+export const isMembershipExpired = (dueDate: number | null) => {
+  if (!dueDate) return false;
+  const now = Math.round(new Date().getTime() / 1000);
+  return dueDate < now;
+};
