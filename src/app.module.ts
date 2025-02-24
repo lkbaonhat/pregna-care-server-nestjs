@@ -12,6 +12,8 @@ import { MembershipPlanModule } from './membership-plan/membership-plan.module';
 import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { PaymentsModule } from './payments/payments.module';
+import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
+import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
 
 @Module({
   imports: [
@@ -47,6 +49,8 @@ import { PaymentsModule } from './payments/payments.module';
     MembershipPlanModule,
     PaymentsModule,
     StripeModule,
+    FetusStandardModule,
+    FetalDiseaseModule,
   ],
   providers: [
     {
