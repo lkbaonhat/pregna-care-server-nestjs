@@ -7,6 +7,7 @@ import { hashPasswordHelper } from '../utils/helper';
 import { MembershipDocument, MembershipSchema } from './membership.schema';
 import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
 import { PaymentDocument, PaymentSchema } from 'src/payments/payment.schema';
+import { FetusDocument, FetusSchema } from 'src/fetuses/entities/fetus.entity';
 
 @Schema({
   toJSON: {
@@ -99,6 +100,9 @@ export class User {
 
   @Prop({ type: [PaymentSchema.omit(['userId'])], default: [] })
   transactions: Omit<PaymentDocument, 'userId'>[];
+
+  @Prop({ type: [FetusSchema.omit(['userId'])], default: [] })
+  fetuses: Omit<FetusDocument, 'userId'>[];
 }
 
 export type UserDocument = HydratedDocument<User>;

@@ -1,17 +1,7 @@
-import {
-  IsIn,
-  IsMongoId,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-} from 'class-validator';
+import { IsIn, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { FetusGender } from '../types/gender.type';
 
-export class CreateFetusDto {
-  @IsMongoId()
-  @IsNotEmpty()
-  userId: string;
-
+export class CreateUserFetusDto {
   @IsString()
   @IsNotEmpty()
   name: string;

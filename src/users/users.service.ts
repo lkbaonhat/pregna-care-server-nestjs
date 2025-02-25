@@ -11,6 +11,7 @@ import { hashPasswordHelper } from 'src/utils/helper';
 import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
 import { MembershipDocument } from './membership.schema';
 import { PaymentDocument } from 'src/payments/payment.schema';
+import { FetusDocument } from 'src/fetuses/entities/fetus.entity';
 
 @Injectable()
 export class UsersService {
@@ -125,6 +126,49 @@ export class UsersService {
 
     delete payment.userId;
     user.transactions[transactionIndex] = payment;
+    return user.save();
+  }
+
+  async addFetus(user: UserDocument, fetus: FetusDocument) {
+    delete fetus.userId;
+    user.fetuses.push(fetus);
+    return await user.save();
+  }
+
+  async updateFetus(user: UserDocument, fetus: FetusDocument) {
+    const fetusIndex = user.fetuses.findIndex(
+      (userFetus) => userFetus._id.toString() === fetus._id.toString(),
+    );
+    if (fetusIndex === -1) {
+      throw new NotFoundException('Fetus not found');
+    }
+
+    delete fetus.userId;
+    user.fetuses[fetusIndex] = fetus;
+    return user.save();
+  }
+
+  async softDeleteFetus(user: UserDocument, fetusId: string) {
+    const fetusIndex = user.fetuses.findIndex(
+      (fetus) => fetus._id.toString() === fetusId,
+    );
+    if (fetusIndex === -1) {
+      throw new NotFoundException('Fetus not found');
+    }
+
+    user.fetuses[fetusIndex].isDeleted = true;
+    return user.save();
+  }
+
+  async hardDeleteFetus(user: UserDocument, fetusId: string) {
+    const fetusIndex = user.fetuses.findIndex(
+      (fetus) => fetus._id.toString() === fetusId,
+    );
+    if (fetusIndex === -1) {
+      throw new NotFoundException('Fetus not found');
+    }
+
+    user.fetuses.splice(fetusIndex, 1);
     return user.save();
   }
 }
