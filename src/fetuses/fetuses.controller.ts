@@ -18,10 +18,11 @@ import { CreateUserFetusDto } from './dto/create-user-fetus.dto';
 import { Request } from 'express';
 import { Response } from 'src/types/core';
 import { ParseMongoIdPipe } from 'src/pipes/parse-mongo-id.pipe';
+import { UpdateUserFetusDto } from './dto/update-user-fetus.dto';
 
 @Controller('fetuses')
 export class FetusesController {
-  constructor(private readonly fetusesService: FetusesService) {}
+  constructor(private readonly fetusesService: FetusesService) { }
 
   @UseGuards(AdminGuard)
   @Post('/create')
@@ -115,13 +116,13 @@ export class FetusesController {
   async updateByUser(
     @Req() req: Request,
     @Param('id', ParseMongoIdPipe) id: string,
-    @Body() updateFetusDto: UpdateFetusDto,
+    @Body() updateUserFetusDto: UpdateUserFetusDto,
   ): Promise<Response> {
     const user = req.user as UserDocument;
     const updatedFetus = await this.fetusesService.updateByUser(
       user,
       id,
-      updateFetusDto,
+      updateUserFetusDto,
     );
 
     return {

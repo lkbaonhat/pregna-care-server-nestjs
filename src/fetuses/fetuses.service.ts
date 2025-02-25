@@ -14,7 +14,7 @@ export class FetusesService {
   constructor(
     @InjectModel('Fetus') private fetusModel: Model<Fetus>,
     private usersService: UsersService,
-  ) {}
+  ) { }
 
   // ADMIN
   async create(createFetusDto: CreateFetusDto) {
@@ -129,9 +129,10 @@ export class FetusesService {
   async updateByUser(
     user: UserDocument,
     fetusId: string,
-    updateFetusDto: UpdateUserFetusDto,
+    updateUserFetusDto: UpdateUserFetusDto,
   ) {
-    const fetus = await this.update(fetusId, updateFetusDto);
+    const fetus = await this.update(fetusId, updateUserFetusDto);
+
     await this.usersService.updateFetus(user, fetus);
     return fetus;
   }

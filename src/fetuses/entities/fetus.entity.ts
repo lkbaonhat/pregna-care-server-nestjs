@@ -1,11 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 import { FetusGender } from '../types/gender.type';
-import { User } from 'src/users/user.schema';
 
 @Schema({ timestamps: true })
 export class Fetus {
-  @Prop({ type: SchemaTypes.ObjectId, ref: User.name, required: true })
+  @Prop({ type: SchemaTypes.ObjectId, ref: 'User', required: true })
   userId?: Types.ObjectId;
 
   @Prop({ type: String, required: true, default: '' })
