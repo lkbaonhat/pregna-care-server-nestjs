@@ -218,7 +218,7 @@ export class AuthService {
       }
 
       // Update password
-      await this.userService.updatePassword(user._id.toString(), newPassword);
+      await this.userService.resetPassword(user._id.toString(), newPassword);
 
       return {
         message: 'Password reset successful',

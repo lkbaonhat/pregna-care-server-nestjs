@@ -19,6 +19,8 @@ import { Request } from 'express';
 import { User, UserDocument } from './user.schema';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { AdminGuard } from 'src/guards/admin.guard';
+import { UpdatePasswordDto } from './dtos/update-password.dto';
+import { UpdateProfileDto } from './dtos/update-profile.dto';
 
 @Controller('users')
 export class UsersController {
@@ -64,8 +66,23 @@ export class UsersController {
   }
 
   // TODO: Add User route to update only password
+  @Put('password')
+  async updatePassword(@Req() req: Request, @Body() body: UpdatePasswordDto): Promise<Response> {
+    const user = req.user as UserDocument;
+    const result = await this.usersService.updatePassword(user.id, body.oldPassword, body.newPassword);
+    return { data: result, message: 'Password updated' };
+  }
+
   // TODO: Add User route to upload avatar
+  
   // TODO: Add User route to update bloodType, nationality, phoneNumber, firstName, lastName, dateOfBirth
+  @Put('profile')
+  async updateProfile(@Req() req: Request, @Body() body: UpdateProfileDto): Promise<Response> {
+    const user = req.user as UserDocument;
+    const result = await this.usersService.updateProfile(user.id, body);
+    return { data: result };
+  }
+
   @UseGuards(AdminGuard)
   @Put(':id')
   async updateUser(
