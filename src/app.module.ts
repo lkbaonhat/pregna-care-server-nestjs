@@ -14,6 +14,7 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { PaymentsModule } from './payments/payments.module';
 import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
 import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
+import { FetusesModule } from './fetuses/fetuses.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
     StripeModule,
     FetusStandardModule,
     FetalDiseaseModule,
+    FetusesModule,
   ],
   providers: [
     {
