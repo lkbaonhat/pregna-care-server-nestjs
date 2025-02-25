@@ -21,23 +21,21 @@ export class FetusesService {
     }
   }
 
-  // async findAll() {
-  //   try {
-  //     const fetuses = await this.fetusModel.find();
-  //     if (fetuses.length === 0) {
-  //       throw new NotFoundException('No fetuses found');
-  //     }
-  //     return fetuses;
-  //   } catch (error) {
-  //     if (error instanceof NotFoundException) {
-  //       throw error;
-  //     }
-  //     throw new Error('Error');
-  //   }
-  // }
   async findAll() {
-    return await this.fetusModel.find();
+    try {
+      const fetuses = await this.fetusModel.find();
+      if (fetuses.length === 0) {
+        throw new NotFoundException('No fetuses found');
+      }
+      return fetuses;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error('Error');
+    }
   }
+
   async findOne(id: string) {
     try {
       const fetus = await this.fetusModel.findById(id);
