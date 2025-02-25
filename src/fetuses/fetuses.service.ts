@@ -4,11 +4,19 @@ import { UpdateFetusDto } from './dto/update-fetus.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Fetus } from './entities/fetus.entity';
+import { UserDocument } from 'src/users/user.schema';
+import { CreateUserFetusDto } from './dto/create-user-fetus.dto';
+import { UsersService } from 'src/users/users.service';
+import { UpdateUserFetusDto } from './dto/update-user-fetus.dto';
 
 @Injectable()
 export class FetusesService {
-  constructor(@InjectModel('Fetus') private fetusModel: Model<Fetus>) { }
+  constructor(
+    @InjectModel('Fetus') private fetusModel: Model<Fetus>,
+    private usersService: UsersService,
+  ) {}
 
+  // ADMIN
   async create(createFetusDto: CreateFetusDto) {
     try {
       const createdFetus = new this.fetusModel(createFetusDto);
@@ -96,18 +104,47 @@ export class FetusesService {
       if (!deletedFetus) {
         throw new NotFoundException('Fetus not found');
       }
-      return {
-        message: 'Deleted successfully',
-        data: {
-          id: deletedFetus._id,
-          name: deletedFetus.name,
-        },
-      };
+      return deletedFetus;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
       throw new Error('Error');
     }
+  }
+
+  // USER
+  async createByUser(user: UserDocument, createFetusDto: CreateUserFetusDto) {
+    const createdFetus = new this.fetusModel({
+      userId: user._id,
+      ...createFetusDto,
+    });
+
+    await createdFetus.save();
+    await this.usersService.addFetus(user, createdFetus);
+
+    return createdFetus;
+  }
+
+  async updateByUser(
+    user: UserDocument,
+    fetusId: string,
+    updateFetusDto: UpdateUserFetusDto,
+  ) {
+    const fetus = await this.update(fetusId, updateFetusDto);
+    await this.usersService.updateFetus(user, fetus);
+    return fetus;
+  }
+
+  async softDeleteByUser(user: UserDocument, fetusId: string) {
+    const fetus = await this.softDelete(fetusId);
+    await this.usersService.softDeleteFetus(user, fetus._id.toString());
+    return fetus;
+  }
+
+  async hardDeleteByUser(user: UserDocument, fetusId: string) {
+    const fetus = await this.hardDelete(fetusId);
+    await this.usersService.hardDeleteFetus(user, fetus._id.toString());
+    return fetus;
   }
 }

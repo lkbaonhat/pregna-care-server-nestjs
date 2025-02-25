@@ -3,12 +3,14 @@ import { FetusesService } from './fetuses.service';
 import { FetusesController } from './fetuses.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Fetus, FetusSchema } from './entities/fetus.entity';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Fetus.name, schema: FetusSchema }]),
+    UsersModule,
   ],
   controllers: [FetusesController],
   providers: [FetusesService],
 })
-export class FetusesModule { }
+export class FetusesModule {}
