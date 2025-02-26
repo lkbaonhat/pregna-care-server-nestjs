@@ -12,6 +12,8 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { MembershipPlanModule } from './membership-plan/membership-plan.module';
 import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
 import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
+import { CreateBlogPostModule } from './blog-post/blog-post.module';
+import { S3Module } from './s3/s3.module';
 
 @Module({
   imports: [
@@ -47,6 +49,8 @@ import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
     MembershipPlanModule,
     FetusStandardModule,
     FetalDiseaseModule,
+    CreateBlogPostModule,
+    S3Module
   ],
   providers: [
     {
@@ -60,4 +64,4 @@ import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
     JwtStrategy,
   ],
 })
-export class AppModule {}
+export class AppModule { }
