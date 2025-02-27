@@ -75,6 +75,12 @@ export class UsersService {
     return user.deleteOne();
   }
 
+  updateStripeCustomerId(userId: string, stripeCustomerId: string) {
+    return this.userModel.findByIdAndUpdate(userId, {
+      stripeCustomerId,
+    });
+  }
+
   async updatePassword(userId: string, newPassword: string) {
     const hashedPassword = await hashPasswordHelper(newPassword);
     await this.userModel.findByIdAndUpdate(userId, {

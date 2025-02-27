@@ -7,6 +7,7 @@ import Stripe from 'stripe';
 import { StripeCustomerDto } from './dtos/customer.dto';
 import { stripeConfig } from 'src/config/stripe-config';
 import { UserDocument } from 'src/users/user.schema';
+import { UsersService } from 'src/users/users.service';
 
 export type StripeCustomerData = {
   user: UserDocument;
@@ -19,7 +20,10 @@ export type StripeCustomerData = {
 export class StripeCustomerProcessor extends WorkerHost {
   private readonly logger = new Logger(StripeCustomerProcessor.name);
   private stripe: Stripe;
-  constructor(@Inject(ConfigService) private configService: ConfigService) {
+  constructor(
+    @Inject(ConfigService) private configService: ConfigService,
+    private usersService: UsersService,
+  ) {
     super();
     this.stripe = new Stripe(
       this.configService.getOrThrow('STRIPE_SECRET_KEY'),
@@ -27,7 +31,7 @@ export class StripeCustomerProcessor extends WorkerHost {
     );
   }
   async process(job: Job<StripeCustomerData>): Promise<void> {
-    this.logger.log('Job:', job.name);
+    this.logger.log(`Processing job ${job.id} of type ${job.name}`);
     switch (job.name) {
       case 'create':
         await this.createStripeCustomer(job);
@@ -51,10 +55,17 @@ export class StripeCustomerProcessor extends WorkerHost {
       email: user.email,
       ...stripeCustomer,
     });
-    this.logger.log('Created stripe customer:', customer.email);
+    this.logger.log(`Created stripe customer: ${customer.email}`);
 
-    user.stripeCustomerId = customer.id;
-    await user.save();
+    try {
+      this.usersService.updateStripeCustomerId(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        user?._id?.toString() || user.id,
+        customer.id,
+      );
+    } catch (error) {
+      this.logger.error('Error updating user with stripe customer id:', error);
+    }
 
     return customer;
   }

@@ -2,7 +2,17 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 import { FetusGender } from '../types/gender.type';
 
-@Schema({ timestamps: true })
+@Schema({
+  toJSON: {
+    transform(_, ret) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.__v;
+    },
+  },
+  timestamps: true,
+})
 export class Fetus {
   @Prop({ type: SchemaTypes.ObjectId, ref: 'User', required: true })
   userId?: Types.ObjectId;
