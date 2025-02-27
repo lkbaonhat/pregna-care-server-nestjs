@@ -148,4 +148,12 @@ export class FetusesService {
     await this.usersService.hardDeleteFetus(user, fetus._id.toString());
     return fetus;
   }
+
+  async getFetusesByUser(userId: string) {
+    const fetuses = await this.fetusModel.find({ userId }).exec();
+    if (!fetuses.length) {
+      throw new NotFoundException('No fetuses found for this user');
+    }
+    return fetuses;
+  }
 }

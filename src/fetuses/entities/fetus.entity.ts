@@ -18,6 +18,12 @@ export class Fetus {
 
   @Prop({ default: false })
   isDeleted: boolean;
+
+  @Prop({
+    type: [{ type: SchemaTypes.ObjectId, ref: 'GrowthMetric' }],
+    default: [],
+  })
+  metrics: Types.ObjectId[];
 }
 export type FetusDocument = HydratedDocument<Fetus>;
 export const FetusSchema = SchemaFactory.createForClass(Fetus);

@@ -112,6 +112,17 @@ export class FetusesController {
     };
   }
 
+  @Get('users/:userId')
+  async getFetusesByUser(
+    @Param('userId', ParseMongoIdPipe) userId: string,
+  ): Promise<Response> {
+    const result = await this.fetusesService.getFetusesByUser(userId);
+    return {
+      message: 'Get Fetuses successfully',
+      data: result,
+    };
+  }
+
   @Put('users/:id')
   async updateByUser(
     @Req() req: Request,

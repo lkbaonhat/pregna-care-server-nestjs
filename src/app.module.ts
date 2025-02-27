@@ -15,6 +15,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
 import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
 import { FetusesModule } from './fetuses/fetuses.module';
+import { GrowthMetricModule } from './growth-metric/growth-metric.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { FetusesModule } from './fetuses/fetuses.module';
     FetusStandardModule,
     FetalDiseaseModule,
     FetusesModule,
+    GrowthMetricModule,
   ],
   providers: [
     {
