@@ -75,8 +75,8 @@ export class UsersService {
     return user.deleteOne();
   }
 
-  updateStripeCustomerId(userId: string, stripeCustomerId: string) {
-    return this.userModel.findByIdAndUpdate(userId, {
+  async updateStripeCustomerId(userId: string, stripeCustomerId: string) {
+    await this.userModel.findByIdAndUpdate(userId, {
       stripeCustomerId,
     });
   }

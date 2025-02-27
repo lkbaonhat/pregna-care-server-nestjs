@@ -58,7 +58,7 @@ export class StripeCustomerProcessor extends WorkerHost {
     this.logger.log(`Created stripe customer: ${customer.email}`);
 
     try {
-      this.usersService.updateStripeCustomerId(
+      await this.usersService.updateStripeCustomerId(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         user?._id?.toString() || user.id,
         customer.id,
