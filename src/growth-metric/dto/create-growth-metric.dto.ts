@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { IsNumber, IsString, ValidateNested } from 'class-validator';
 
 export class GrowthMetricData {
@@ -16,5 +17,6 @@ export class CreateGrowthMetricDto {
   week: number;
 
   @ValidateNested({ each: true })
+  @Type(() => GrowthMetricData)
   data: GrowthMetricData[];
 }

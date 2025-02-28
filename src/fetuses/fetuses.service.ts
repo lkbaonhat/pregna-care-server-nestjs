@@ -14,7 +14,7 @@ export class FetusesService {
   constructor(
     @InjectModel('Fetus') private fetusModel: Model<Fetus>,
     private usersService: UsersService,
-  ) { }
+  ) {}
 
   // ADMIN
   async create(createFetusDto: CreateFetusDto) {

@@ -13,7 +13,7 @@ export class GrowthMetricService {
     private growthMetricModel: Model<GrowthMetricDocument>,
     @InjectModel('Fetus')
     private fetusModel: Model<FetusDocument>,
-  ) {}
+  ) { }
 
   async createByMember(
     fetusId: string,
@@ -54,6 +54,18 @@ export class GrowthMetricService {
       await growthMetrics.save();
     }
 
+    return growthMetrics;
+  }
+
+  async findAllGrowthsByFetusId(fetusId: string) {
+    const fetus = await this.fetusModel.findById(fetusId);
+    if (!fetus) {
+      throw new NotFoundException('Fetus not found');
+    }
+    const growthMetrics = await this.growthMetricModel.findOne({ fetusId });
+    if (!growthMetrics) {
+      throw new NotFoundException('Growth metrics not found');
+    }
     return growthMetrics;
   }
 

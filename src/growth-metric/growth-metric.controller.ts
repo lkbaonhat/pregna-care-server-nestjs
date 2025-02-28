@@ -33,21 +33,32 @@ export class GrowthMetricController {
     };
   }
 
-  @Patch('/update/:fetusId')
-  async updateByMember(
+  @Get('/find-all-by-fetus/:fetusId')
+  async findAllByFetusId(
     @Param('fetusId', ParseMongoIdPipe) fetusId: string,
-    @Body() createGrowthMetricDto: UpdateGrowthMetricDto[],
   ): Promise<Response> {
-    const updatedGrowthMetric = await this.growthMetricService.updateByMember(
-      fetusId,
-      createGrowthMetricDto,
-    );
-
+    const growthMetrics =
+      await this.growthMetricService.findAllGrowthsByFetusId(fetusId);
     return {
-      message: 'GrowthMetric updated successfully',
-      data: createdGrowthMetric,
+      data: growthMetrics,
     };
   }
+
+  // @Patch('/update/:fetusId')
+  // async updateByMember(
+  //   @Param('fetusId', ParseMongoIdPipe) fetusId: string,
+  //   @Body() createGrowthMetricDto: UpdateGrowthMetricDto[],
+  // ): Promise<Response> {
+  //   const updatedGrowthMetric = await this.growthMetricService.updateByMember(
+  //     fetusId,
+  //     createGrowthMetricDto,
+  //   );
+
+  //   return {
+  //     message: 'GrowthMetric updated successfully',
+  //     data: updatedGrowthMetric,
+  //   };
+  // }
 
   @Get()
   findAll() {

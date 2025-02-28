@@ -22,7 +22,7 @@ import { AdminGuard } from 'src/guards/admin.guard';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) { }
+  constructor(private usersService: UsersService) {}
 
   @UseGuards(AdminGuard)
   @Get()

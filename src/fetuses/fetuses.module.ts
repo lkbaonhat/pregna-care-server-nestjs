@@ -17,4 +17,4 @@ import { UsersModule } from 'src/users/users.module';
     FetusesService,
   ],
 })
-export class FetusesModule { }
+export class FetusesModule {}

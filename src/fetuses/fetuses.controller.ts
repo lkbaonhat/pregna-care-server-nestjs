@@ -22,7 +22,7 @@ import { UpdateUserFetusDto } from './dto/update-user-fetus.dto';
 
 @Controller('fetuses')
 export class FetusesController {
-  constructor(private readonly fetusesService: FetusesService) { }
+  constructor(private readonly fetusesService: FetusesService) {}
 
   @UseGuards(AdminGuard)
   @Post('/create')
