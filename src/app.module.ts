@@ -15,6 +15,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
 import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
 import { FetusesModule } from './fetuses/fetuses.module';
+import { GrowthMetricModule } from './growth-metric/growth-metric.module';
 
 @Module({
   imports: [
@@ -42,7 +43,7 @@ import { FetusesModule } from './fetuses/fetuses.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 20,
+        limit: 200,
       },
     ]),
     UsersModule,
@@ -53,6 +54,7 @@ import { FetusesModule } from './fetuses/fetuses.module';
     FetusStandardModule,
     FetalDiseaseModule,
     FetusesModule,
+    GrowthMetricModule,
   ],
   providers: [
     {
@@ -66,4 +68,4 @@ import { FetusesModule } from './fetuses/fetuses.module';
     JwtStrategy,
   ],
 })
-export class AppModule {}
+export class AppModule { }

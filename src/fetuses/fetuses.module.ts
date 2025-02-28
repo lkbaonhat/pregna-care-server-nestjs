@@ -12,5 +12,9 @@ import { UsersModule } from 'src/users/users.module';
   ],
   controllers: [FetusesController],
   providers: [FetusesService],
+  exports: [
+    MongooseModule.forFeature([{ name: Fetus.name, schema: FetusSchema }]),
+    FetusesService,
+  ],
 })
 export class FetusesModule {}
