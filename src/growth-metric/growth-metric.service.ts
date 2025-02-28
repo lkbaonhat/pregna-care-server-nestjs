@@ -36,8 +36,9 @@ export class GrowthMetricService {
         data: [createGrowthMetricDto],
       });
       await growthMetrics.save();
-      fetus.metrics = growthMetrics._id;
-      await fetus.save();
+      await this.fetusModel.findByIdAndUpdate(fetusId, {
+        metrics: growthMetrics._id,
+      });
     } else {
       growthMetrics = existedGrowthMetrics;
 

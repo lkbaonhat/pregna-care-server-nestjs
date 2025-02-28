@@ -19,9 +19,7 @@ export class Fetus {
   @Prop({ default: false })
   isDeleted: boolean;
 
-  @Prop({
-    type: { type: SchemaTypes.ObjectId, ref: 'GrowthMetric' },
-  })
+  @Prop({ type: SchemaTypes.ObjectId, ref: 'GrowthMetric' })
   metrics?: Types.ObjectId;
 }
 export type FetusDocument = HydratedDocument<Fetus>;

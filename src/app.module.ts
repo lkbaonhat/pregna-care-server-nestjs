@@ -43,7 +43,7 @@ import { GrowthMetricModule } from './growth-metric/growth-metric.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 20,
+        limit: 200,
       },
     ]),
     UsersModule,
@@ -68,4 +68,4 @@ import { GrowthMetricModule } from './growth-metric/growth-metric.module';
     JwtStrategy,
   ],
 })
-export class AppModule {}
+export class AppModule { }
