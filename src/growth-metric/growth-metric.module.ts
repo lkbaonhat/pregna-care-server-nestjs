@@ -18,4 +18,4 @@ import { FetusesModule } from 'src/fetuses/fetuses.module';
   controllers: [GrowthMetricController],
   providers: [GrowthMetricService],
 })
-export class GrowthMetricModule { }
+export class GrowthMetricModule {}

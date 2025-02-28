@@ -11,15 +11,16 @@ import { GrowthMetricService } from './growth-metric.service';
 import { CreateGrowthMetricDto } from './dto/create-growth-metric.dto';
 import { UpdateGrowthMetricDto } from './dto/update-growth-metric.dto';
 import { Response } from 'src/types/core';
+import { ParseMongoIdPipe } from 'src/pipes/parse-mongo-id.pipe';
 
 @Controller('growth-metric')
 export class GrowthMetricController {
-  constructor(private readonly growthMetricService: GrowthMetricService) { }
+  constructor(private readonly growthMetricService: GrowthMetricService) {}
 
   @Post('/create/:fetusId')
   async createByMember(
-    @Param('fetusId') fetusId: string,
-    @Body() createGrowthMetricDto: CreateGrowthMetricDto[],
+    @Param('fetusId', ParseMongoIdPipe) fetusId: string,
+    @Body() createGrowthMetricDto: CreateGrowthMetricDto,
   ): Promise<Response> {
     const createdGrowthMetric = await this.growthMetricService.createByMember(
       fetusId,
@@ -28,6 +29,22 @@ export class GrowthMetricController {
 
     return {
       message: 'GrowthMetric created successfully',
+      data: createdGrowthMetric,
+    };
+  }
+
+  @Patch('/update/:fetusId')
+  async updateByMember(
+    @Param('fetusId', ParseMongoIdPipe) fetusId: string,
+    @Body() createGrowthMetricDto: UpdateGrowthMetricDto[],
+  ): Promise<Response> {
+    const updatedGrowthMetric = await this.growthMetricService.updateByMember(
+      fetusId,
+      createGrowthMetricDto,
+    );
+
+    return {
+      message: 'GrowthMetric updated successfully',
       data: createdGrowthMetric,
     };
   }

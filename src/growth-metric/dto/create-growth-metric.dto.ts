@@ -1,6 +1,6 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, ValidateNested } from 'class-validator';
 
-export class CreateGrowthMetricDto {
+export class GrowthMetricData {
   @IsString()
   name: string;
 
@@ -9,7 +9,12 @@ export class CreateGrowthMetricDto {
 
   @IsNumber()
   value: number;
+}
 
+export class CreateGrowthMetricDto {
   @IsNumber()
   week: number;
+
+  @ValidateNested({ each: true })
+  data: GrowthMetricData[];
 }
