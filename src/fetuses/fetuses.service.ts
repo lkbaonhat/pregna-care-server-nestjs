@@ -114,6 +114,15 @@ export class FetusesService {
   }
 
   // USER
+  async checkInvalidFetus(user: UserDocument, fetusId: string) {
+    const fetus = await this.fetusModel.findById(fetusId);
+    return (
+      !fetus ||
+      !fetus?.userId ||
+      fetus.userId.toString() !== user._id.toString()
+    );
+  }
+
   async createByUser(user: UserDocument, createFetusDto: CreateUserFetusDto) {
     const createdFetus = new this.fetusModel({
       userId: user._id,
@@ -131,19 +140,41 @@ export class FetusesService {
     fetusId: string,
     updateUserFetusDto: UpdateUserFetusDto,
   ) {
-    const fetus = await this.update(fetusId, updateUserFetusDto);
+    const isInvalidFetus = await this.checkInvalidFetus(user, fetusId);
+    if (isInvalidFetus) {
+      throw new NotFoundException('Fetus not found');
+    }
 
-    await this.usersService.updateFetus(user, fetus);
-    return fetus;
+    const result = await this.fetusModel.findByIdAndUpdate(
+      fetusId,
+      updateUserFetusDto,
+      {
+        new: true,
+      },
+    );
+
+    await this.usersService.updateFetus(user, result!);
+
+    return result;
   }
 
   async softDeleteByUser(user: UserDocument, fetusId: string) {
+    const isInvalidFetus = await this.checkInvalidFetus(user, fetusId);
+    if (isInvalidFetus) {
+      throw new NotFoundException('Fetus not found');
+    }
+
     const fetus = await this.softDelete(fetusId);
     await this.usersService.softDeleteFetus(user, fetus._id.toString());
     return fetus;
   }
 
   async hardDeleteByUser(user: UserDocument, fetusId: string) {
+    const isInvalidFetus = await this.checkInvalidFetus(user, fetusId);
+    if (isInvalidFetus) {
+      throw new NotFoundException('Fetus not found');
+    }
+
     const fetus = await this.hardDelete(fetusId);
     await this.usersService.hardDeleteFetus(user, fetus._id.toString());
     return fetus;
@@ -151,6 +182,16 @@ export class FetusesService {
 
   async getFetusesByUser(userId: string) {
     const fetuses = await this.fetusModel.find({ userId }).exec();
+    if (!fetuses.length) {
+      throw new NotFoundException('No fetuses found for this user');
+    }
+    return fetuses;
+  }
+
+  async getFetusesFromJWTUser(user: UserDocument) {
+    const fetuses = await this.fetusModel
+      .find({ userId: user._id, isDeleted: false })
+      .exec();
     if (!fetuses.length) {
       throw new NotFoundException('No fetuses found for this user');
     }

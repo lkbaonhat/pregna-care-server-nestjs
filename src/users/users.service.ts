@@ -149,9 +149,14 @@ export class UsersService {
       throw new NotFoundException('Fetus not found');
     }
 
-    delete fetus.userId;
-    user.fetuses[fetusIndex] = fetus;
-    return user.save();
+    try {
+      user.fetuses[fetusIndex].name = fetus.name;
+      user.fetuses[fetusIndex].dueDate = fetus.dueDate;
+      user.fetuses[fetusIndex].gender = fetus.gender;
+      await user.save();
+    } catch (error) {
+      console.log('Error update fetus in User: ', error);
+    }
   }
 
   async softDeleteFetus(user: UserDocument, fetusId: string) {
