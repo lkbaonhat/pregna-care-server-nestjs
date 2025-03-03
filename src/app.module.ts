@@ -7,11 +7,15 @@ import { BullModule } from '@nestjs/bullmq';
 
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { StripeModule } from './stripe/stripe.module';
+import { MembershipPlanModule } from './membership-plan/membership-plan.module';
 import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
-import { MembershipPlanModule } from './membership-plan/membership-plan.module';
+import { PaymentsModule } from './payments/payments.module';
 import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
 import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
+import { FetusesModule } from './fetuses/fetuses.module';
+import { GrowthMetricModule } from './growth-metric/growth-metric.module';
 import { CreateBlogPostModule } from './blog-post/blog-post.module';
 import { S3Module } from './s3/s3.module';
 
@@ -41,14 +45,18 @@ import { S3Module } from './s3/s3.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 20,
+        limit: 200,
       },
     ]),
     UsersModule,
     AuthModule,
     MembershipPlanModule,
+    PaymentsModule,
+    StripeModule,
     FetusStandardModule,
     FetalDiseaseModule,
+    FetusesModule,
+    GrowthMetricModule,
     CreateBlogPostModule,
     S3Module
   ],

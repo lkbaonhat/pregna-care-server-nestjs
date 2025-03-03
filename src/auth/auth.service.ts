@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 import { EmailsService } from 'src/emails/emails.service';
 import { UsersService } from 'src/users/users.service';
@@ -12,9 +13,9 @@ import { UsersService } from 'src/users/users.service';
 import { comparePasswordHelper } from 'src/utils/helper';
 import { UserStatus } from 'src/users/types/user-status';
 import { UserDocument } from 'src/users/user.schema';
-import { ConfigService } from '@nestjs/config';
 import { ConfirmToken } from 'src/users/types/confirm-token';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
+import { StripeService } from 'src/stripe/stripe.service';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +24,7 @@ export class AuthService {
     private userService: UsersService,
     private jwtService: JwtService,
     private mailService: EmailsService,
+    private stripeService: StripeService,
   ) {}
 
   async sendValidationEmail(id: string, email: string) {
@@ -135,6 +137,12 @@ export class AuthService {
 
     user.status = UserStatus.Active;
     await user.save();
+
+    // Create Stripe customer
+    await this.stripeService.createStripeCustomer(user, {
+      name: user.firstName,
+      phone: user.phoneNumber,
+    });
 
     // Send a JWT token for the user to immediately sign in
     return this.signin(user);

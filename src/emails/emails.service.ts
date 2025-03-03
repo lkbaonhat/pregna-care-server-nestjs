@@ -17,4 +17,14 @@ export class EmailsService {
     const job = await this.emailQueue.add('reset-password', data);
     return job.id;
   }
+
+  async sendPaymentSuccessEmail(data: Mail) {
+    const job = await this.emailQueue.add('payment-success', data);
+    return job.id;
+  }
+
+  async sendMembershipPlanConfirmEmail(data: Mail) {
+    const job = await this.emailQueue.add('membership-plan-confirm', data);
+    return job.id;
+  }
 }

@@ -12,6 +12,7 @@ import { AuthService } from './auth.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import googleAuthConfig from './config/google-auth.config';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { StripeModule } from 'src/stripe/stripe.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
     ConfigModule.forFeature(googleAuthConfig),
     EmailsModule,
     UsersModule,
+    StripeModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, GoogleStrategy],

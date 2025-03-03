@@ -4,6 +4,10 @@ import { HydratedDocument } from 'mongoose';
 import { UserRoles, UserStatus } from './types/user-status';
 import { EMPTY_STRING } from '../constants/core';
 import { hashPasswordHelper } from '../utils/helper';
+import { MembershipDocument, MembershipSchema } from './membership.schema';
+import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
+import { PaymentDocument, PaymentSchema } from 'src/payments/payment.schema';
+import { FetusDocument, FetusSchema } from 'src/fetuses/entities/fetus.entity';
 
 @Schema({
   toJSON: {
@@ -32,10 +36,24 @@ export class User {
 
   @Prop({
     type: String,
+  })
+  stripeCustomerId?: string;
+
+  @Prop({
+    type: String,
     enum: Object.values(UserRoles),
     default: UserRoles.Member,
   })
   role: UserRoles;
+
+  @Prop({
+    type: MembershipSchema,
+    default: {
+      plan: MembershipPlanTypes.Free,
+      dueDate: null,
+    },
+  })
+  membership: MembershipDocument;
 
   @Prop({
     type: String,
@@ -79,6 +97,12 @@ export class User {
 
   @Prop({ type: String, default: 'Unknown' })
   nationality: string;
+
+  @Prop({ type: [PaymentSchema.omit(['userId'])], default: [] })
+  transactions: Omit<PaymentDocument, 'userId'>[];
+
+  @Prop({ type: [FetusSchema.omit(['userId'])], default: [] })
+  fetuses: Omit<FetusDocument, 'userId'>[];
 }
 
 export type UserDocument = HydratedDocument<User>;

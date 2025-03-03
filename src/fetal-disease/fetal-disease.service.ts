@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateFetalDiseaseDto } from './dto/create-fetal-disease.dto';
 import { FetalDisease } from './entities/fetal-disease.entity';
 import { Model } from 'mongoose';
@@ -6,15 +10,15 @@ import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class FetalDiseaseService {
-
   constructor(
-    @InjectModel(FetalDisease.name) private fetalDiseaseModel: Model<FetalDisease>
-  ) { }
+    @InjectModel(FetalDisease.name)
+    private fetalDiseaseModel: Model<FetalDisease>,
+  ) {}
 
   //#region find one fetal disease by name
   async findOneFetalDiseaseByName(name: string) {
     const result = await this.fetalDiseaseModel.findOne({
-      name: name
+      name: name,
     });
     return result ? result : null;
   }
@@ -37,20 +41,20 @@ export class FetalDiseaseService {
   async findFetalDiseasesByWeek(week: number, isDeleted: boolean = false) {
     try {
       const diseases = await this.fetalDiseaseModel.find({
-        affectedWeeks: { $in: [week], $nin: [isDeleted] }
+        affectedWeeks: { $in: [week], $nin: [isDeleted] },
       });
       if (!diseases || diseases.length === 0) {
         throw new NotFoundException(`No fetal diseases found for week ${week}`);
       }
 
       return {
-        data: diseases
+        data: diseases,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(error.message);
       }
-      throw new Error("Error fetching fetal diseases by week");
+      throw new Error('Error fetching fetal diseases by week');
     }
   }
   //#endregion
@@ -58,16 +62,18 @@ export class FetalDiseaseService {
   //#region create
   async create(createFetalDiseaseDto: CreateFetalDiseaseDto) {
     try {
-      const isFetalDisease = await this.isFetalDiseaseExist(createFetalDiseaseDto.name);
+      const isFetalDisease = await this.isFetalDiseaseExist(
+        createFetalDiseaseDto.name,
+      );
       if (isFetalDisease) {
         throw new ConflictException('Fetal Disease already exists');
       }
 
       const fetalDisease = new this.fetalDiseaseModel(createFetalDiseaseDto);
-      fetalDisease.save()
+      fetalDisease.save();
       return {
         data: fetalDisease,
-        message: 'Fetal Disease created successfully'
+        message: 'Fetal Disease created successfully',
       };
     } catch (error) {
       if (error instanceof ConflictException) {

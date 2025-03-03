@@ -6,12 +6,16 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { User } from './user.schema';
+import { User, UserDocument } from './user.schema';
 import { hashPasswordHelper } from 'src/utils/helper';
+import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
+import { MembershipDocument } from './membership.schema';
+import { PaymentDocument } from 'src/payments/payment.schema';
+import { FetusDocument } from 'src/fetuses/entities/fetus.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private userModel: Model<User>) { }
+  constructor(@InjectModel('User') private userModel: Model<User>) {}
 
   create(email: string, password: string) {
     const user = new this.userModel({ email, password });
@@ -71,10 +75,106 @@ export class UsersService {
     return user.deleteOne();
   }
 
+  async updateStripeCustomerId(userId: string, stripeCustomerId: string) {
+    await this.userModel.findByIdAndUpdate(userId, {
+      stripeCustomerId,
+    });
+  }
+
   async updatePassword(userId: string, newPassword: string) {
     const hashedPassword = await hashPasswordHelper(newPassword);
     await this.userModel.findByIdAndUpdate(userId, {
       password: hashedPassword,
     });
+  }
+
+  async updateMembership(user: UserDocument, plan: MembershipPlanTypes) {
+    const now = Math.round(new Date().getTime() / 1000);
+    let newDueDate: number | null = null;
+    if (plan === MembershipPlanTypes.Freemium)
+      newDueDate = now + 60 * 60 * 24 * 3; // 3 days
+    if (plan === MembershipPlanTypes.OneMonth)
+      newDueDate = now + 60 * 60 * 24 * 30; // 30 days
+    user.membership = {
+      plan,
+      dueDate: newDueDate,
+    } as MembershipDocument;
+
+    await user.save();
+
+    return user;
+  }
+
+  async cancelMembership(user: UserDocument) {
+    await this.userModel.findByIdAndUpdate(user._id, {
+      membership: {
+        plan: MembershipPlanTypes.Free,
+        dueDate: null,
+      },
+    });
+  }
+
+  async addTransaction(user: UserDocument, payment: PaymentDocument) {
+    delete payment.userId;
+    // Add transaction to user
+    user.transactions.push(payment);
+    return user.save();
+  }
+
+  async updateTransaction(user: UserDocument, payment: PaymentDocument) {
+    // Find and update transaction
+    const transactionIndex = user.transactions.findIndex(
+      (transaction) => transaction._id.toString() === payment._id.toString(),
+    );
+    if (transactionIndex === -1) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    delete payment.userId;
+    user.transactions[transactionIndex] = payment;
+    return user.save();
+  }
+
+  async addFetus(user: UserDocument, fetus: FetusDocument) {
+    delete fetus.userId;
+    user.fetuses.push(fetus);
+    return await user.save();
+  }
+
+  async updateFetus(user: UserDocument, fetus: FetusDocument) {
+    const fetusIndex = user.fetuses.findIndex(
+      (userFetus) => userFetus._id.toString() === fetus._id.toString(),
+    );
+    if (fetusIndex === -1) {
+      throw new NotFoundException('Fetus not found');
+    }
+
+    delete fetus.userId;
+    user.fetuses[fetusIndex] = fetus;
+    return user.save();
+  }
+
+  async softDeleteFetus(user: UserDocument, fetusId: string) {
+    const fetusIndex = user.fetuses.findIndex(
+      (fetus) => fetus._id.toString() === fetusId,
+    );
+    if (fetusIndex === -1) {
+      throw new NotFoundException('Fetus not found');
+    }
+
+    user.fetuses[fetusIndex].isDeleted = true;
+    return user.save();
+  }
+
+  async hardDeleteFetus(user: UserDocument, fetusId: string) {
+    const fetusIndex = user.fetuses.findIndex(
+      (fetus) => fetus._id.toString() === fetusId,
+    );
+    if (fetusIndex === -1) {
+      throw new NotFoundException('Fetus not found');
+    }
+
+    user.fetuses.splice(fetusIndex, 1);
+    return user.save();
   }
 }
