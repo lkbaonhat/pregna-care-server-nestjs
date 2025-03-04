@@ -11,12 +11,9 @@ import { hashPasswordHelper, comparePasswordHelper } from 'src/utils/helper';
 import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
 import { MembershipDocument } from './membership.schema';
 import { PaymentDocument } from 'src/payments/payment.schema';
-<<<<<<< HEAD
 import { UpdateProfileDto } from './dtos/update-profile.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
-=======
 import { FetusDocument } from 'src/fetuses/entities/fetus.entity';
->>>>>>> 0e15c08c3553ada128c43d191cd925b2a77ebde2
 
 @Injectable()
 export class UsersService {
@@ -111,22 +108,14 @@ export class UsersService {
     return user.deleteOne();
   }
 
-<<<<<<< HEAD
-=======
+
   async updateStripeCustomerId(userId: string, stripeCustomerId: string) {
     await this.userModel.findByIdAndUpdate(userId, {
       stripeCustomerId,
     });
   }
 
-  async updatePassword(userId: string, newPassword: string) {
-    const hashedPassword = await hashPasswordHelper(newPassword);
-    await this.userModel.findByIdAndUpdate(userId, {
-      password: hashedPassword,
-    });
-  }
 
->>>>>>> 0e15c08c3553ada128c43d191cd925b2a77ebde2
   async updateMembership(user: UserDocument, plan: MembershipPlanTypes) {
     const now = Math.round(new Date().getTime() / 1000);
     let newDueDate: number | null = null;

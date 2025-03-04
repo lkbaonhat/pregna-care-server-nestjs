@@ -23,8 +23,8 @@ import { FetusesModule } from './fetuses/fetuses.module';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
+      useFactory: (_configService: ConfigService) => ({
+        uri: 'mongodb+srv://baoha1234:12345@cluster0.rsgrbfo.mongodb.net/pregna-care-dev?retryWrites=true&w=majority&appName=Cluster0',
       }),
       inject: [ConfigService],
     }),

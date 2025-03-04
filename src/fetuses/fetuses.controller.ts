@@ -24,7 +24,6 @@ import { UpdateUserFetusDto } from './dto/update-user-fetus.dto';
 export class FetusesController {
   constructor(private readonly fetusesService: FetusesService) { }
 
-  @UseGuards(AdminGuard)
   @Post('/create')
   async create(@Body() createFetusDto: CreateFetusDto): Promise<Response> {
     const createdFetus = await this.fetusesService.create(createFetusDto);
@@ -35,7 +34,6 @@ export class FetusesController {
     };
   }
 
-  @UseGuards(AdminGuard)
   @Get('/find-all')
   async findAll(): Promise<Response> {
     const result = await this.fetusesService.findAll();
@@ -45,7 +43,6 @@ export class FetusesController {
     };
   }
 
-  @UseGuards(AdminGuard)
   @Get(':id')
   async findOne(@Param('id', ParseMongoIdPipe) id: string): Promise<Response> {
     const result = await this.fetusesService.findOne(id);
