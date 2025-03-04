@@ -110,6 +110,28 @@ export class FetusStandardService {
   }
   //#endregion
 
+  //#region find fetus standard by week for member
+  async findByWeekForMember(week: number) {
+    try {
+      const result = await this.userModel.find(
+        { 'weeks.week': week },
+        { name: 1, unit: 1, _id: 0 },
+      );
+      if (!result || result.length === 0) {
+        throw new NotFoundException(`No data found for week ${week}`);
+      }
+      return {
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error('Error');
+    }
+  }
+  //#endregion
+
   //#region Search
   async search(name: string) {
     const regex = new RegExp(name, 'i');

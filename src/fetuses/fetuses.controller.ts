@@ -22,7 +22,7 @@ import { UpdateUserFetusDto } from './dto/update-user-fetus.dto';
 
 @Controller('fetuses')
 export class FetusesController {
-  constructor(private readonly fetusesService: FetusesService) { }
+  constructor(private readonly fetusesService: FetusesService) {}
 
   @Post('/create')
   async create(@Body() createFetusDto: CreateFetusDto): Promise<Response> {
@@ -106,6 +106,17 @@ export class FetusesController {
     return {
       message: 'Created successfully',
       data: createUser,
+    };
+  }
+
+  @Get('users/:userId')
+  async getFetusesByUser(
+    @Param('userId', ParseMongoIdPipe) userId: string,
+  ): Promise<Response> {
+    const result = await this.fetusesService.getFetusesByUser(userId);
+    return {
+      message: 'Get Fetuses successfully',
+      data: result,
     };
   }
 
