@@ -15,7 +15,7 @@ import { ParseMongoIdPipe } from 'src/pipes/parse-mongo-id.pipe';
 
 @Controller('growth-metric')
 export class GrowthMetricController {
-  constructor(private readonly growthMetricService: GrowthMetricService) {}
+  constructor(private readonly growthMetricService: GrowthMetricService) { }
 
   @Post('/create/:fetusId')
   async createByMember(
@@ -39,6 +39,20 @@ export class GrowthMetricController {
   ): Promise<Response> {
     const growthMetrics =
       await this.growthMetricService.findAllGrowthsByFetusId(fetusId);
+    return {
+      data: growthMetrics,
+    };
+  }
+
+  @Get('/chart-radar/:fetusId/:week')
+  async chartRadarGrowthMetrics(
+    @Param('fetusId', ParseMongoIdPipe) fetusId: string,
+    @Param('week') week: number,
+  ): Promise<Response> {
+    const growthMetrics = await this.growthMetricService.chartRadarGrowthMetrics(
+      fetusId,
+      +week,
+    );
     return {
       data: growthMetrics,
     };
