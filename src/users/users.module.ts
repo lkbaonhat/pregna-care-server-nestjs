@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { User, UserSchema } from './user.schema';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { UsersService } from './users.service';
         schema: UserSchema,
       },
     ]),
+    S3Module,
   ],
   controllers: [UsersController],
   providers: [UsersService],

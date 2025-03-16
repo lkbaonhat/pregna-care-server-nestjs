@@ -19,7 +19,7 @@ import { FetusDocument } from 'src/fetuses/entities/fetus.entity';
 export class UsersService {
   constructor(@InjectModel('User') private userModel: Model<User>) {}
 
-    create(email: string, password: string) {
+  create(email: string, password: string) {
     const user = new this.userModel({ email, password });
     return user.save();
   }
@@ -58,29 +58,36 @@ export class UsersService {
 
   async updateProfile(userId: string, profileData: UpdateProfileDto) {
     const user = await this.findById(userId);
-      if (!user) {
-    throw new NotFoundException('User not found');
-  }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     Object.assign(user, profileData);
     return user.save();
   }
 
-  async updatePassword(userId: string, oldPassword: string, newPassword: string) {
+  async updatePassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string,
+  ) {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const isPasswordMatch = await comparePasswordHelper(oldPassword, user.password);
+    const isPasswordMatch = await comparePasswordHelper(
+      oldPassword,
+      user.password,
+    );
     if (!isPasswordMatch) {
       throw new BadRequestException('Old password is incorrect');
-    } 
+    }
     const hashedPassword = await hashPasswordHelper(newPassword);
     await this.userModel.findByIdAndUpdate(userId, {
       password: hashedPassword,
     });
   }
 
-    async resetPassword(userId: string, newPassword: string) {
+  async resetPassword(userId: string, newPassword: string) {
     const hashedPassword = await hashPasswordHelper(newPassword);
     await this.userModel.findByIdAndUpdate(userId, {
       password: hashedPassword,
@@ -108,14 +115,50 @@ export class UsersService {
     return user.deleteOne();
   }
 
-
   async updateStripeCustomerId(userId: string, stripeCustomerId: string) {
     await this.userModel.findByIdAndUpdate(userId, {
       stripeCustomerId,
     });
   }
 
+  //* Avatar
+  async updateAvatar(userId: string, avatarUrl: string) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
+    // Store previous avatar URL for cleanup if needed
+    const previousAvatarUrl = user.avatarUrl;
+
+    // Update user with new avatar URL
+    user.avatarUrl = avatarUrl;
+    await user.save();
+
+    return {
+      previousAvatarUrl,
+      currentAvatarUrl: avatarUrl,
+      user,
+    };
+  }
+
+  async deleteAvatar(userId: string) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const previousAvatarUrl = user.avatarUrl;
+    user.avatarUrl = '';
+    await user.save();
+
+    return {
+      previousAvatarUrl,
+      user,
+    };
+  }
+
+  //* Membership
   async updateMembership(user: UserDocument, plan: MembershipPlanTypes) {
     const now = Math.round(new Date().getTime() / 1000);
     let newDueDate: number | null = null;

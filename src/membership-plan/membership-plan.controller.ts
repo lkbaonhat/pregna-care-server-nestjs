@@ -46,6 +46,13 @@ export class MembershipPlanController {
     return { data: membershipPlan };
   }
 
+  @Get('type/:type')
+  @Public()
+  async findByType(@Param('type') type: string): Promise<Response> {
+    const membershipPlans = await this.membershipPlanService.findByType(type);
+    return { data: membershipPlans };
+  }
+
   @UseGuards(AdminGuard)
   @Patch(':id')
   @ApiBody({ type: UpdateMembershipPlanDto })
