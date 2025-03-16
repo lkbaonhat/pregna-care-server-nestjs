@@ -15,7 +15,7 @@ export class GrowthMetricService {
     @InjectModel('Fetus')
     private fetusModel: Model<FetusDocument>,
     private fetusStandardService: FetusStandardService,
-  ) { }
+  ) {}
 
   async createByMember(
     fetusId: string,
@@ -70,7 +70,7 @@ export class GrowthMetricService {
       throw new NotFoundException('Growth metrics not found');
     }
 
-    return growthMetrics
+    return growthMetrics;
   }
 
   async chartRadarGrowthMetrics(fetusId: string, week: number) {
@@ -83,41 +83,38 @@ export class GrowthMetricService {
     if (!growthMetrics) {
       throw new NotFoundException('Growth metrics not found');
     }
-    console.log("growthMetrics", growthMetrics);
-    const growthMetric = growthMetrics.data.find((metric) => metric.week === week);
-    console.log("growthMetric", growthMetric);
+    const growthMetric = growthMetrics.data.find(
+      (metric) => metric.week === week && metric.data.length > 2,
+    );
     if (!growthMetric) {
-      throw new NotFoundException(`Growth metric not found for week ${week}`);
+      throw new NotFoundException(`Chart Data not found in for week ${week}`);
     }
 
-    // Fetch standard data for the specific week
-    // Make sure this method exists in your FetusStandardService
-    const standardData = await this.fetusStandardService.findFetusStandardByWeek(week);
+    const standardData =
+      await this.fetusStandardService.findFetusStandardByWeek(week);
     if (!standardData) {
       throw new NotFoundException(`Standard data not found for week ${week}`);
     }
-    console.log("standardData", standardData);
 
-    // Create a combined data array that includes current values
     const combinedData = [...standardData];
 
-    // Add current values for each metric type present in growthMetric.data
     if (growthMetric.data && growthMetric.data.length > 0) {
-      growthMetric.data.forEach(item => {
+      growthMetric.data.forEach((item) => {
         // Find if this item type already exists in standard data
-        if (standardData.some(std => std.item === item.type)) {
+        if (standardData.some((std) => std.item === item.name)) {
           combinedData.push({
-            item: item.type,
-            value: "current",
-            score: item.value
+            item: item.name,
+            value: 'current',
+            score: item.value,
           });
         }
       });
     }
+    const groupedData = combinedData.sort((a, b) =>
+      a.item.localeCompare(b.item),
+    );
 
-    return {
-      data: combinedData
-    };
+    return groupedData;
   }
 
   findAll() {

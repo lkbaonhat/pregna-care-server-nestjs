@@ -13,7 +13,7 @@ import { UpdateFetusStandardDto } from './dto/update-fetus-standard.dto';
 export class FetusStandardService {
   constructor(
     @InjectModel(FetusStandard.name) private userModel: Model<FetusStandard>,
-  ) { }
+  ) {}
 
   async findFetusStandardByWeek(week: number) {
     const standards = await this.userModel.find({
@@ -26,19 +26,17 @@ export class FetusStandardService {
 
     // Transform data to the requested format
     const result: { item: string; value: string; score: number }[] = [];
-    standards.forEach(standard => {
-      const weekData = standard.weeks.find(w => w.week === week);
+    standards.forEach((standard) => {
+      const weekData = standard.weeks.find((w) => w.week === week);
       if (weekData) {
         result.push(
           { item: standard.name, value: 'min', score: weekData.min },
-          { item: standard.name, value: 'max', score: weekData.max }
+          { item: standard.name, value: 'max', score: weekData.max },
         );
       }
     });
 
-    return {
-      data: result,
-    };
+    return result;
   }
 
   //#region findOneStandardByName

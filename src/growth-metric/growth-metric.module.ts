@@ -5,7 +5,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { GrowthMetricSchema } from './entities/growth-metric.entity';
 import { FetusSchema } from 'src/fetuses/entities/fetus.entity';
 import { FetusStandardModule } from 'src/fetus-standard/fetus-standard.module';
-import { FetusStandard, FetusStandardSchema } from 'src/fetus-standard/entities/fetus-standard.entity';
+import {
+  FetusStandard,
+  FetusStandardSchema,
+} from 'src/fetus-standard/entities/fetus-standard.entity';
 
 @Module({
   imports: [
@@ -19,4 +22,4 @@ import { FetusStandard, FetusStandardSchema } from 'src/fetus-standard/entities/
   controllers: [GrowthMetricController],
   providers: [GrowthMetricService],
 })
-export class GrowthMetricModule { }
+export class GrowthMetricModule {}

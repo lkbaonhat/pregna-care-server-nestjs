@@ -68,4 +68,4 @@ import { GrowthMetricModule } from './growth-metric/growth-metric.module';
     JwtStrategy,
   ],
 })
-export class AppModule { }
+export class AppModule {}

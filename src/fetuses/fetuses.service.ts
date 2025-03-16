@@ -14,7 +14,7 @@ export class FetusesService {
   constructor(
     @InjectModel('Fetus') private fetusModel: Model<Fetus>,
     private usersService: UsersService,
-  ) { }
+  ) {}
 
   // ADMIN
   async create(createFetusDto: CreateFetusDto) {
@@ -182,7 +182,7 @@ export class FetusesService {
 
   async getFetusesByUser(userId: string) {
     const user = await this.usersService.findById(userId);
-    console.log("user", user);
+    console.log('user', user);
     const fetuses = await this.fetusModel.find({ userId }).exec();
     if (!fetuses.length) {
       throw new NotFoundException('No fetuses found for this user');
