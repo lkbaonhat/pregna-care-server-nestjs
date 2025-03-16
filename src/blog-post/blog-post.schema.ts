@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, SchemaTypes } from 'mongoose';
 import { BlogStatus } from './types/BlogStatus';
 
 export type BlogPostDocument = HydratedDocument<BlogPost>;
@@ -14,8 +14,17 @@ export class BlogPost {
   @Prop({ required: true })
   heading: string;
 
-  @Prop({ required: true })
-  content: string;
+  @Prop({
+    type: String,
+    required: true,
+    get: function (data: string) {
+      return JSON.parse(data) as object;
+    },
+    set: function (data) {
+      return JSON.stringify(data);
+    },
+  })
+  content: object;
 
   @Prop({ required: true })
   description: string;
