@@ -8,34 +8,55 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { S3Service } from './s3.service';
 import * as multer from 'multer';
-import { ApiConsumes, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiBody, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { Public } from 'src/constants/core';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { Response } from 'src/types/core';
 
 @ApiTags('File Upload')
 @Controller('upload')
 export class S3Controller {
     constructor(private readonly s3Service: S3Service) { }
 
-    @Public()
     @Post('single')
     @ApiConsumes('multipart/form-data')
     @ApiBody({
         schema: {
             type: 'object',
             properties: {
+                heading: {
+                    type: 'string',
+                },
+                content: {
+                    type: 'string',
+                },
                 file: {
                     type: 'string',
-                    format: 'binary',
+                    format: 'json',
                 },
             },
         },
     })
+    @ApiResponse({
+        status: 201,
+        description: 'File uploaded successfully',
+        schema: {
+            type: 'object',
+            properties: {
+                url: { type: 'string' },
+                key: { type: 'string' }
+            }
+        }
+    })
     @UseInterceptors(FileInterceptor('file', { storage: multer.memoryStorage() }))
-    async uploadSingle(@UploadedFile() file: Express.Multer.File) {
-        return this.s3Service.uploadFile(file);
+    async uploadSingle(@UploadedFile() file: Express.Multer.File): Promise<Response> {
+        const result = await this.s3Service.uploadFile(file);
+        return {
+            data: result
+        };
+
     }
 
-    @Public()
     @Post('multiple')
     @ApiConsumes('multipart/form-data')
     @ApiBody({

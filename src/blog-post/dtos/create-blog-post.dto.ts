@@ -1,21 +1,14 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsNumber, IsJSON } from 'class-validator';
 
 export class CreateBlogPostDto {
-    @IsString()
-    @IsNotEmpty()
-    author_id: string;
 
     @IsString()
     @IsNotEmpty()
     heading: string;
 
-    @IsString()
     @IsNotEmpty()
-    page_title: string;
-
-    @IsString()
-    @IsNotEmpty()
-    content: string;
+    @IsJSON()
+    content: unknown;
 
     @IsString()
     @IsNotEmpty()
@@ -25,13 +18,12 @@ export class CreateBlogPostDto {
     @IsNotEmpty()
     feature_image_url: string;
 
-    @IsString()
-    @IsNotEmpty()
-    url_handle: string;
+    @IsInt()
+    week: number;
 
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
-    published_date: string;
+    published_date: number;
 
     @IsNotEmpty()
     is_active: boolean;

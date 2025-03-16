@@ -32,8 +32,8 @@ export class BlogPost {
   @Prop({ required: true })
   feature_image_url: string;
 
-  @Prop({ required: true })
-  published_date: string;
+  @Prop({ type: Number, required: true })
+  published_date: number;
 
   @Prop({ required: true, default: true })
   is_active: boolean;
