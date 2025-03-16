@@ -181,6 +181,10 @@ export class FetusesService {
   }
 
   async getFetusesByUser(userId: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     const fetuses = await this.fetusModel.find({ userId }).exec();
     if (!fetuses.length) {
       throw new NotFoundException('No fetuses found for this user');

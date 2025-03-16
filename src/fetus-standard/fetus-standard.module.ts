@@ -15,5 +15,11 @@ import {
   ],
   controllers: [FetusStandardController],
   providers: [FetusStandardService],
+  exports: [
+    MongooseModule.forFeature([
+      { name: FetusStandard.name, schema: FetusStandardSchema },
+    ]),
+    FetusStandardService,
+  ],
 })
 export class FetusStandardModule {}
