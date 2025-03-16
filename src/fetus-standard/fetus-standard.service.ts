@@ -115,14 +115,34 @@ export class FetusStandardService {
     try {
       const result = await this.userModel.find(
         { 'weeks.week': week },
-        { name: 1, unit: 1, _id: 0 },
+        {
+          name: 1,
+          unit: 1,
+          _id: 0,
+          weeks: {
+            $elemMatch: { week: week },
+          },
+        },
       );
       if (!result || result.length === 0) {
         throw new NotFoundException(`No data found for week ${week}`);
       }
-      return {
-        data: result,
-      };
+
+      const newResult = result.map((standard) => {
+        const weekIndex = standard.weeks.findIndex((w) => w.week === week);
+        if (weekIndex === -1) {
+          return null;
+        }
+        const weekData = standard.weeks[weekIndex];
+        return {
+          name: standard.name,
+          unit: standard.unit,
+          min: weekData.min,
+          max: weekData.max,
+        };
+      });
+
+      return newResult.filter((r) => r !== null);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

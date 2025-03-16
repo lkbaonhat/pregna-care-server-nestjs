@@ -7,6 +7,7 @@ import {
 } from './entities/growth-metric.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FetusesModule } from 'src/fetuses/fetuses.module';
+import { FetusStandardModule } from 'src/fetus-standard/fetus-standard.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { FetusesModule } from 'src/fetuses/fetuses.module';
       { name: GrowthMetric.name, schema: GrowthMetricSchema },
     ]),
     FetusesModule,
+    FetusStandardModule,
   ],
   controllers: [GrowthMetricController],
   providers: [GrowthMetricService],

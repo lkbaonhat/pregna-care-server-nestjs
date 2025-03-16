@@ -5,6 +5,7 @@ import { FetusDocument } from 'src/fetuses/entities/fetus.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { GrowthMetricDocument } from './entities/growth-metric.entity';
+import { FetusStandardService } from 'src/fetus-standard/fetus-standard.service';
 
 @Injectable()
 export class GrowthMetricService {
@@ -13,7 +14,8 @@ export class GrowthMetricService {
     private growthMetricModel: Model<GrowthMetricDocument>,
     @InjectModel('Fetus')
     private fetusModel: Model<FetusDocument>,
-  ) { }
+    private fetusStandardService: FetusStandardService,
+  ) {}
 
   async createByMember(
     fetusId: string,
@@ -63,11 +65,49 @@ export class GrowthMetricService {
     if (!fetus) {
       throw new NotFoundException('Fetus not found');
     }
+
     const growthMetrics = await this.growthMetricModel.findOne({ fetusId });
     if (!growthMetrics) {
       throw new NotFoundException('Growth metrics not found');
     }
-    return growthMetrics;
+
+    const growthMetricWeeks = growthMetrics.data.map((metric) => metric.week);
+    const newGrowthMetrics: {
+      week: number;
+      data: {
+        name: string;
+        unit: string;
+        value: number;
+        min: number;
+        max: number;
+      }[];
+    }[] = [];
+    for (const week of growthMetricWeeks) {
+      const newStandard =
+        await this.fetusStandardService.findByWeekForMember(week);
+      const value = growthMetrics.data.find((metric) => metric.week === week);
+      if (!value) {
+        throw new NotFoundException('Value not found');
+      }
+      const result = newStandard.map((standard) => {
+        const valueData = value.data.find(
+          (data) => data.name === standard.name,
+        );
+        if (!valueData) {
+          throw new NotFoundException('Value data not found');
+        }
+        return {
+          ...standard,
+          value: valueData.value,
+        };
+      });
+      newGrowthMetrics.push({
+        week: week,
+        data: result,
+      });
+    }
+
+    return newGrowthMetrics;
   }
 
   findAll() {

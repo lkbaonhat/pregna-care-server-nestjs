@@ -43,6 +43,16 @@ export class FetusesController {
     };
   }
 
+  @Get('users')
+  async getFetusesFromJWTUser(@Req() req: Request): Promise<Response> {
+    const user = req.user as UserDocument;
+    const result = await this.fetusesService.getFetusesFromJWTUser(user);
+    return {
+      data: result,
+    };
+  }
+
+  @UseGuards(AdminGuard)
   @Get(':id')
   async findOne(@Param('id', ParseMongoIdPipe) id: string): Promise<Response> {
     const result = await this.fetusesService.findOne(id);
