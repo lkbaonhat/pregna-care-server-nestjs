@@ -15,16 +15,10 @@ export class BlogPost {
   heading: string;
 
   @Prop({
-    type: String,
+    type: SchemaTypes.Mixed,
     required: true,
-    get: function (data: string) {
-      return JSON.parse(data) as object;
-    },
-    set: function (data) {
-      return JSON.stringify(data);
-    },
   })
-  content: object;
+  content: unknown;
 
   @Prop({ required: true })
   description: string;
@@ -34,9 +28,6 @@ export class BlogPost {
 
   @Prop({ type: Number, required: true })
   published_date: number;
-
-  @Prop({ required: true, default: true })
-  is_active: boolean;
 
   @Prop({
     required: true,
