@@ -16,6 +16,8 @@ import { FetusStandardModule } from './fetus-standard/fetus-standard.module';
 import { FetalDiseaseModule } from './fetal-disease/fetal-disease.module';
 import { FetusesModule } from './fetuses/fetuses.module';
 import { GrowthMetricModule } from './growth-metric/growth-metric.module';
+import { CreateBlogPostModule } from './blog-post/blog-post.module';
+import { S3Module } from './s3/s3.module';
 
 @Module({
   imports: [
@@ -55,6 +57,8 @@ import { GrowthMetricModule } from './growth-metric/growth-metric.module';
     FetalDiseaseModule,
     FetusesModule,
     GrowthMetricModule,
+    CreateBlogPostModule,
+    S3Module
   ],
   providers: [
     {
