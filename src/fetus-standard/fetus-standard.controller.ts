@@ -13,6 +13,7 @@ import { FetusStandardService } from './fetus-standard.service';
 import { CreateFetusStandardDto } from './dto/create-fetus-standard.dto';
 import { UpdateFetusStandardDto } from './dto/update-fetus-standard.dto';
 import { AdminGuard } from 'src/guards/admin.guard';
+import { Response } from 'src/types/core';
 
 @Controller('admin/fetus-standard')
 export class FetusStandardController {
@@ -48,8 +49,9 @@ export class FetusStandardController {
   }
 
   @Get('/find-by-week')
-  async findByWeekForMember(@Query('week') week: number) {
-    return this.fetusStandardService.findByWeekForMember(+week);
+  async findByWeekForMember(@Query('week') week: number): Promise<Response> {
+    const result = await this.fetusStandardService.findByWeekForMember(+week);
+    return { data: result };
   }
 
   @UseGuards(AdminGuard)

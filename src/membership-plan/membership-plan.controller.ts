@@ -16,8 +16,9 @@ import { AdminGuard } from 'src/guards/admin.guard';
 import { ParseMongoIdPipe } from 'src/pipes/parse-mongo-id.pipe';
 import { ApiBody } from '@nestjs/swagger';
 import { MembershipPlan } from './membership-plan.schema';
+import { Public } from 'src/constants/core';
 
-@Controller('admin/membership-plan')
+@Controller('membership-plan')
 export class MembershipPlanController {
   constructor(private readonly membershipPlanService: MembershipPlanService) {}
 
@@ -33,6 +34,7 @@ export class MembershipPlanController {
   }
 
   @Get()
+  @Public()
   async findAll(): Promise<Response> {
     const membershipPlans = await this.membershipPlanService.findAll();
     return { data: membershipPlans };
@@ -42,6 +44,13 @@ export class MembershipPlanController {
   async findOne(@Param('id', ParseMongoIdPipe) id: string): Promise<Response> {
     const membershipPlan = await this.membershipPlanService.findOne(id);
     return { data: membershipPlan };
+  }
+
+  @Get('type/:type')
+  @Public()
+  async findByType(@Param('type') type: string): Promise<Response> {
+    const membershipPlans = await this.membershipPlanService.findByType(type);
+    return { data: membershipPlans };
   }
 
   @UseGuards(AdminGuard)

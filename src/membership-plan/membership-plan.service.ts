@@ -25,6 +25,10 @@ export class MembershipPlanService {
     return this.membershipPlanModel.findById(id);
   }
 
+  async findByType(type: string) {
+    return this.membershipPlanModel.find({ type });
+  }
+
   async update(id: string, updateMembershipPlanDto: Partial<MembershipPlan>) {
     const membershipPlan = await this.membershipPlanModel.findById(id);
     if (!membershipPlan)

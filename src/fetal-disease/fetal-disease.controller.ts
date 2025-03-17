@@ -23,7 +23,8 @@ export class FetalDiseaseController {
 
   @Get('find-all')
   async findAll() {
-    return await this.fetalDiseaseService.findAll();
+    const fetalDeseases =  await this.fetalDiseaseService.findAll();
+    return { data: fetalDeseases };
   }
 
   @Get('find-by-week')

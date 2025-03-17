@@ -7,10 +7,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { User, UserDocument } from './user.schema';
-import { hashPasswordHelper } from 'src/utils/helper';
+import { hashPasswordHelper, comparePasswordHelper } from 'src/utils/helper';
 import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
 import { MembershipDocument } from './membership.schema';
 import { PaymentDocument } from 'src/payments/payment.schema';
+import { UpdateProfileDto } from './dtos/update-profile.dto';
+import { CreateUserDto } from './dtos/create-user.dto';
 import { FetusDocument } from 'src/fetuses/entities/fetus.entity';
 
 @Injectable()
@@ -54,6 +56,44 @@ export class UsersService {
     return this.userModel.findById(id);
   }
 
+  async updateProfile(userId: string, profileData: UpdateProfileDto) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    Object.assign(user, profileData);
+    return user.save();
+  }
+
+  async updatePassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const isPasswordMatch = await comparePasswordHelper(
+      oldPassword,
+      user.password,
+    );
+    if (!isPasswordMatch) {
+      throw new BadRequestException('Old password is incorrect');
+    }
+    const hashedPassword = await hashPasswordHelper(newPassword);
+    await this.userModel.findByIdAndUpdate(userId, {
+      password: hashedPassword,
+    });
+  }
+
+  async resetPassword(userId: string, newPassword: string) {
+    const hashedPassword = await hashPasswordHelper(newPassword);
+    await this.userModel.findByIdAndUpdate(userId, {
+      password: hashedPassword,
+    });
+  }
+
   findByEmail(email: string) {
     return this.userModel.findOne({ email });
   }
@@ -81,13 +121,44 @@ export class UsersService {
     });
   }
 
-  async updatePassword(userId: string, newPassword: string) {
-    const hashedPassword = await hashPasswordHelper(newPassword);
-    await this.userModel.findByIdAndUpdate(userId, {
-      password: hashedPassword,
-    });
+  //* Avatar
+  async updateAvatar(userId: string, avatarUrl: string) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Store previous avatar URL for cleanup if needed
+    const previousAvatarUrl = user.avatarUrl;
+
+    // Update user with new avatar URL
+    user.avatarUrl = avatarUrl;
+    await user.save();
+
+    return {
+      previousAvatarUrl,
+      currentAvatarUrl: avatarUrl,
+      user,
+    };
   }
 
+  async deleteAvatar(userId: string) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const previousAvatarUrl = user.avatarUrl;
+    user.avatarUrl = '';
+    await user.save();
+
+    return {
+      previousAvatarUrl,
+      user,
+    };
+  }
+
+  //* Membership
   async updateMembership(user: UserDocument, plan: MembershipPlanTypes) {
     const now = Math.round(new Date().getTime() / 1000);
     let newDueDate: number | null = null;
