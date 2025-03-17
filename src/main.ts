@@ -9,7 +9,11 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 
 dotenvConfig({
-  path: [`.env.${process.env.NODE_ENV}.local`, `.env.${process.env.NODE_ENV}`],
+  path: [
+    `.env.${process.env.NODE_ENV}.local`,
+    `.env.${process.env.NODE_ENV}`,
+    '.env',
+  ],
 });
 
 async function bootstrap() {

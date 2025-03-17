@@ -37,25 +37,20 @@ export class S3Service {
   }
 
   async uploadFile(file: Express.Multer.File) {
+    console.log(file);
     const fileKey = `uploads/${uuidv4()}-${file.originalname}`;
-    try {
-      const command = new PutObjectCommand({
-        Bucket: this.bucketName,
-        Key: fileKey,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-        ACL: 'public-read',
-      });
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: fileKey,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
 
-      await this.s3.send(command);
-      return {
-        url: `https://${this.bucketName}.s3.${this.configService.get<string>('AWS_REGION')}.amazonaws.com/${fileKey}`,
-        key: fileKey,
-      };
-    } catch (error) {
-      console.error('Upload S3 Error:', error); // Log để xem lỗi thực tế
-      throw new InternalServerErrorException('Failed to upload file to S3');
-    }
+    await this.s3.send(command);
+    return {
+      url: `https://${this.bucketName}.s3.${this.configService.get<string>('AWS_REGION')}.amazonaws.com/${fileKey}`,
+      key: fileKey,
+    };
   }
 
   async uploadMultipleFiles(files: Express.Multer.File[]) {
