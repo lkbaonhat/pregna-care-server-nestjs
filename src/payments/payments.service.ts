@@ -9,12 +9,15 @@ import { PaymentIntentStatus } from './types/payment-intent-status';
 export class PaymentsService {
   constructor(
     @InjectModel(Payment.name) private paymentModel: Model<Payment>,
-  ) { }
+  ) {}
 
   async findAll(page: number, limit: number) {
     const [data, total] = await Promise.all([
-      this.paymentModel.find().skip((page - 1) * limit).limit(limit),
-      this.paymentModel.countDocuments()
+      this.paymentModel
+        .find()
+        .skip((page - 1) * limit)
+        .limit(limit),
+      this.paymentModel.countDocuments(),
     ]);
 
     return {

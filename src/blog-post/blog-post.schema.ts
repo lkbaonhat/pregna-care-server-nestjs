@@ -6,6 +6,14 @@ export type BlogPostDocument = HydratedDocument<BlogPost>;
 
 @Schema({
   timestamps: true,
+  toJSON: {
+    transform: (_, ret) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.__v;
+    },
+  },
 })
 export class BlogPost {
   @Prop({ required: true })
