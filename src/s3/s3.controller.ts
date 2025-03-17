@@ -24,7 +24,7 @@ export class S3Controller {
       properties: {
         file: {
           type: 'string',
-          format: 'json',
+          format: 'binary',
         },
       },
     },
