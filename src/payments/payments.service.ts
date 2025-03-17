@@ -9,10 +9,26 @@ import { PaymentIntentStatus } from './types/payment-intent-status';
 export class PaymentsService {
   constructor(
     @InjectModel(Payment.name) private paymentModel: Model<Payment>,
-  ) {}
+  ) { }
 
-  async findAll() {
-    return this.paymentModel.find();
+  async findAll(page: number, limit: number) {
+    const [data, total] = await Promise.all([
+      this.paymentModel.find().skip((page - 1) * limit).limit(limit),
+      this.paymentModel.countDocuments()
+    ]);
+
+    return {
+      data: {
+        data,
+        pagination: {
+          total,
+          page,
+          limit,
+          nextPage: total > page * limit ? page + 1 : null,
+          prevPage: page > 1 ? page - 1 : null,
+        },
+      },
+    };
   }
 
   async findById(id: string) {

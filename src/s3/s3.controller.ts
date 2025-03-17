@@ -8,8 +8,10 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { S3Service } from './s3.service';
 import * as multer from 'multer';
-import { ApiConsumes, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiBody, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { Public } from 'src/constants/core';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { Response } from 'src/types/core';
 
 @ApiTags('File Upload')
 @Controller('upload')
