@@ -72,4 +72,4 @@ import { S3Module } from './s3/s3.module';
     JwtStrategy,
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -44,6 +44,18 @@ export class GrowthMetricController {
     };
   }
 
+  @Get('/chart-radar/:fetusId/:week')
+  async chartRadarGrowthMetrics(
+    @Param('fetusId', ParseMongoIdPipe) fetusId: string,
+    @Param('week') week: number,
+  ): Promise<Response> {
+    const growthMetrics =
+      await this.growthMetricService.chartRadarGrowthMetrics(fetusId, +week);
+    return {
+      data: growthMetrics,
+    };
+  }
+
   // @Patch('/update/:fetusId')
   // async updateByMember(
   //   @Param('fetusId', ParseMongoIdPipe) fetusId: string,
