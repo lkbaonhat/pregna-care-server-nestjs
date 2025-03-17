@@ -1,25 +1,26 @@
-import { IsString, IsNotEmpty, IsInt, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsNumber, IsEnum } from 'class-validator';
+import { BlogStatus } from '../types/BlogStatus';
 
 export class CreateBlogPostDto {
-  @IsString()
-  @IsNotEmpty()
-  heading: string;
+    @IsString()
+    @IsNotEmpty()
+    heading: string;
 
-  @IsNotEmpty()
-  content: unknown;
+    @IsNotEmpty()
+    content: unknown;
 
-  @IsString()
-  @IsNotEmpty()
-  description: string;
+    @IsString()
+    @IsNotEmpty()
+    description: string;
 
-  @IsString()
-  @IsNotEmpty()
-  feature_image_url: string;
+    @IsString()
+    @IsNotEmpty()
+    feature_image_url: string;
 
-  @IsInt()
-  week: number;
+    @IsInt()
+    week: number;
 
-  @IsNumber()
-  @IsNotEmpty()
-  published_date: number;
+    @IsNumber()
+    @IsNotEmpty()
+    published_date: number;
 }
