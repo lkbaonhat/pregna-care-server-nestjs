@@ -26,8 +26,8 @@ import { S3Module } from './s3/s3.module';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (_configService: ConfigService) => ({
-        uri: 'mongodb+srv://baoha1234:12345@cluster0.rsgrbfo.mongodb.net/pregna-care-dev?retryWrites=true&w=majority&appName=Cluster0',
+          useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
       }),
       inject: [ConfigService],
     }),
