@@ -18,6 +18,9 @@ export class EmailsProcessor extends WorkerHost {
       case 'verification':
         await this.sendVerification(job);
         break;
+      case 'verification-otp':
+        await this.sendOtpVerification(job);
+        break;
       case 'reset-password':
         await this.sendResetPassword(job);
         break;
@@ -53,6 +56,13 @@ export class EmailsProcessor extends WorkerHost {
     await this.sendMail(job, {
       subject: 'Please confirm your email',
       template: 'validation-email',
+    });
+  }
+
+  async sendOtpVerification(job: Job<Mail>) {
+    await this.sendMail(job, {
+      subject: 'Your verification code',
+      template: 'validation-otp-email',
     });
   }
 
