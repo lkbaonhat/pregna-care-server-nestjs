@@ -196,9 +196,6 @@ export class FetusesService {
     const fetuses = await this.fetusModel
       .find({ userId: user._id, isDeleted: false })
       .exec();
-    if (!fetuses.length) {
-      throw new NotFoundException('No fetuses found for this user');
-    }
     return fetuses;
   }
 }

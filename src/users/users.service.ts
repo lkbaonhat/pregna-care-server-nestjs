@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as bcrypt from 'bcrypt';
 
 import { User, UserDocument } from './user.schema';
 import { hashPasswordHelper, comparePasswordHelper } from 'src/utils/helper';
@@ -12,7 +13,6 @@ import { MembershipPlanTypes } from 'src/membership-plan/types/membership-plan';
 import { MembershipDocument } from './membership.schema';
 import { PaymentDocument } from 'src/payments/payment.schema';
 import { UpdateProfileDto } from './dtos/update-profile.dto';
-import { CreateUserDto } from './dtos/create-user.dto';
 import { FetusDocument } from 'src/fetuses/entities/fetus.entity';
 
 @Injectable()
@@ -252,5 +252,48 @@ export class UsersService {
 
     user.fetuses.splice(fetusIndex, 1);
     return user.save();
+  }
+
+  async generateOTP(userId: string): Promise<string> {
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Hash the OTP
+    const hashedOTP = await bcrypt.hash(otp, 10);
+
+    // Set OTP expiration to 10 minutes from now
+    const otpExpires = new Date();
+    otpExpires.setMinutes(otpExpires.getMinutes() + 10);
+
+    // Save the hashed OTP and expiration to user
+    await this.userModel.findByIdAndUpdate(userId, {
+      otp: hashedOTP,
+      otpExpires,
+    });
+
+    return otp;
+  }
+
+  async verifyOTP(userId: string, otp: string): Promise<boolean> {
+    const user = await this.userModel.findById(userId);
+
+    if (!user || !user.otp || !user.otpExpires) {
+      return false;
+    }
+
+    // Check if OTP has expired
+    if (user.otpExpires < new Date()) {
+      return false;
+    }
+
+    // Check if OTP matches
+    return bcrypt.compare(otp, user.otp);
+  }
+
+  async clearOTP(userId: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      otp: null,
+      otpExpires: null,
+    });
   }
 }

@@ -103,6 +103,12 @@ export class User {
 
   @Prop({ type: [FetusSchema.omit(['userId'])], default: [] })
   fetuses: Omit<FetusDocument, 'userId'>[];
+
+  @Prop({ type: String })
+  otp?: string;
+
+  @Prop({ type: Date })
+  otpExpires?: Date;
 }
 
 export type UserDocument = HydratedDocument<User>;

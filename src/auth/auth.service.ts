@@ -16,6 +16,7 @@ import { UserDocument } from 'src/users/user.schema';
 import { ConfirmToken } from 'src/users/types/confirm-token';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { StripeService } from 'src/stripe/stripe.service';
+import { VerificationMethod } from './types/verification-method';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +46,24 @@ export class AuthService {
     return token;
   }
 
-  async signUp(email: string, password: string) {
+  async sendOtpEmail(id: string, email: string) {
+    // Generate OTP
+    const otp = await this.userService.generateOTP(id);
+
+    // Send email with OTP
+    await this.mailService.sendOtpVerificationEmail({
+      to: email,
+      data: { name: email, otpCode: otp },
+    });
+
+    return otp;
+  }
+
+  async signUp(
+    email: string,
+    password: string,
+    verificationMethod: VerificationMethod = VerificationMethod.Email,
+  ) {
     // Check email in use
     const existedUser = await this.userService.findByEmail(email);
     if (existedUser) {
@@ -61,15 +79,58 @@ export class AuthService {
     const user = await this.userService.create(email, password);
     await user.save();
 
-    // Send validation email
-    const token = await this.sendValidationEmail(user._id.toString(), email);
-
-    return {
+    const baseResult = {
       id: user._id.toString(),
       email: user.email,
-      // TODO: delete this when production
-      confirmationToken: token,
+      verificationMethod,
     };
+
+    // Send verification based on method
+    if (verificationMethod === VerificationMethod.OTP) {
+      const token = await this.sendOtpEmail(user._id.toString(), email);
+
+      return {
+        ...baseResult,
+        otpCode: token,
+      };
+    } else {
+      const token = await this.sendValidationEmail(user._id.toString(), email);
+
+      return {
+        ...baseResult,
+        confirmationToken: token,
+      };
+    }
+  }
+
+  async confirmOtp(userId: string, otp: string) {
+    // Verify OTP
+    const isValid = await this.userService.verifyOTP(userId, otp);
+    if (!isValid) {
+      throw new BadRequestException('Invalid or expired OTP');
+    }
+
+    // Find user
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Activate user
+    user.status = UserStatus.Active;
+    await user.save();
+
+    // Clear OTP
+    await this.userService.clearOTP(userId);
+
+    // Create Stripe customer
+    await this.stripeService.createStripeCustomer(user, {
+      name: user.firstName,
+      phone: user.phoneNumber,
+    });
+
+    // Return signin token
+    return this.signin(user);
   }
 
   signin(user: Partial<UserDocument>) {

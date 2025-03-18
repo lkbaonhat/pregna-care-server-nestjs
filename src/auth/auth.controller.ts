@@ -22,10 +22,33 @@ import {
   RequestResetPasswordDto,
   ResetPasswordDto,
 } from './dtos/reset-password.dto';
+import { SignupDto } from './dtos/signup.dto';
+import { ConfirmOtpDto } from './dtos/confirm-otp.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @Post('signup')
+  @Public()
+  async signup(@Body() signupDto: SignupDto): Promise<Response> {
+    const data = await this.authService.signUp(
+      signupDto.email,
+      signupDto.password,
+      signupDto.verificationMethod,
+    );
+    return { data };
+  }
+
+  @Post('confirm-otp')
+  @Public()
+  async confirmOtp(@Body() confirmOtpDto: ConfirmOtpDto): Promise<Response> {
+    const data = await this.authService.confirmOtp(
+      confirmOtpDto.userId,
+      confirmOtpDto.otp,
+    );
+    return { data };
+  }
 
   @Post('signup')
   @Public()
