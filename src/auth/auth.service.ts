@@ -133,6 +133,44 @@ export class AuthService {
     return this.signin(user);
   }
 
+  async resendOtp(userId: string, email: string) {
+    // Find user
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Verify email matches the user
+    if (user.email !== email) {
+      throw new BadRequestException('Email does not match user record');
+    }
+
+    // Only allow resending OTP for users who are not yet active
+    if (user.status === UserStatus.Active) {
+      throw new BadRequestException('User is already active');
+    }
+
+    // Increment and check the OTP resend count
+    const resendInfo = await this.userService.incrementOtpResendCount(userId);
+
+    // Clear any existing OTP
+    await this.userService.clearOTP(userId);
+
+    // Generate and send new OTP
+    const otp = await this.sendOtpEmail(userId, email);
+
+    return {
+      userId,
+      email,
+      // In development you might want to return the OTP, but remove this in production
+      otpCode: otp,
+      // Return resend count information
+      resendCount: resendInfo.count,
+      resendLimit: 5,
+      resetDate: resendInfo.resetDate,
+    };
+  }
+
   signin(user: Partial<UserDocument>) {
     const payload = {
       email: user.email,

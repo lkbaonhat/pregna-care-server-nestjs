@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 
 RUN npm install
-RUN npm install @css-inline/css-inline-linux-x64-musl
+RUN npm install @css-inline/css-inline-linux-arm64-musl
 
 COPY . .
 

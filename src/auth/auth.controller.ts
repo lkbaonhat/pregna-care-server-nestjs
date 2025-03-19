@@ -24,6 +24,7 @@ import {
 } from './dtos/reset-password.dto';
 import { SignupDto } from './dtos/signup.dto';
 import { ConfirmOtpDto } from './dtos/confirm-otp.dto';
+import { ResendOtpDto } from './dtos/resend-otp.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -48,6 +49,19 @@ export class AuthController {
       confirmOtpDto.otp,
     );
     return { data };
+  }
+
+  @Post('resend-otp')
+  @Public()
+  async resendOtp(@Body() resendOtpDto: ResendOtpDto): Promise<Response> {
+    const data = await this.authService.resendOtp(
+      resendOtpDto.userId,
+      resendOtpDto.email,
+    );
+    return {
+      data,
+      message: `OTP resent successfully. ${data.resendCount}/5 attempts used today.`,
+    };
   }
 
   @Post('signup')

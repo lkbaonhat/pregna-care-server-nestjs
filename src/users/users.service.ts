@@ -296,4 +296,54 @@ export class UsersService {
       otpExpires: null,
     });
   }
+
+  async incrementOtpResendCount(
+    userId: string,
+  ): Promise<{ count: number; resetDate: Date }> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Reset counter if it's a new day
+    if (!user.otpResendCountResetDate || user.otpResendCountResetDate < today) {
+      user.otpResendCount = 1;
+      user.otpResendCountResetDate = today;
+      await user.save();
+      return { count: 1, resetDate: today };
+    }
+
+    // Check if limit is reached
+    if (user.otpResendCount >= 5) {
+      throw new BadRequestException(
+        'OTP resend limit reached for today. Please try again tomorrow.',
+      );
+    }
+
+    // Increment counter
+    user.otpResendCount += 1;
+    await user.save();
+
+    return {
+      count: user.otpResendCount,
+      resetDate: user.otpResendCountResetDate,
+    };
+  }
+
+  async getOtpResendCount(
+    userId: string,
+  ): Promise<{ count: number; resetDate: Date }> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      count: user.otpResendCount || 0,
+      resetDate: user.otpResendCountResetDate || null,
+    };
+  }
 }

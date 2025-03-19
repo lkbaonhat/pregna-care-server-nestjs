@@ -109,6 +109,12 @@ export class User {
 
   @Prop({ type: Date })
   otpExpires?: Date;
+
+  @Prop({ type: Number, default: 0 })
+  otpResendCount: number;
+
+  @Prop({ type: Date, default: null })
+  otpResendCountResetDate: Date;
 }
 
 export type UserDocument = HydratedDocument<User>;
