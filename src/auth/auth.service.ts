@@ -1,0 +1,332 @@
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+
+import { EmailsService } from 'src/emails/emails.service';
+import { UsersService } from 'src/users/users.service';
+
+import { comparePasswordHelper } from 'src/utils/helper';
+import { UserStatus } from 'src/users/types/user-status';
+import { UserDocument } from 'src/users/user.schema';
+import { ConfirmToken } from 'src/users/types/confirm-token';
+import { CreateUserDto } from 'src/users/dtos/create-user.dto';
+import { StripeService } from 'src/stripe/stripe.service';
+import { VerificationMethod } from './types/verification-method';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    @Inject(ConfigService) private configService: ConfigService,
+    private userService: UsersService,
+    private jwtService: JwtService,
+    private mailService: EmailsService,
+    private stripeService: StripeService,
+  ) {}
+
+  async sendValidationEmail(id: string, email: string) {
+    const token = this.jwtService.sign(
+      { email, sub: id },
+      {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+        expiresIn: '1h',
+      },
+    );
+    const url = `${this.configService.get('EMAIL_CONFIRMATION_URL')}/users/validate-email?token=${token}`;
+
+    await this.mailService.sendVerificationEmail({
+      to: email,
+      data: { name: email, confirmationLink: url },
+    });
+
+    return token;
+  }
+
+  async sendOtpEmail(id: string, email: string) {
+    // Generate OTP
+    const otp = await this.userService.generateOTP(id);
+
+    // Send email with OTP
+    await this.mailService.sendOtpVerificationEmail({
+      to: email,
+      data: { name: email, otpCode: otp },
+    });
+
+    return otp;
+  }
+
+  async signUp(
+    email: string,
+    password: string,
+    verificationMethod: VerificationMethod = VerificationMethod.Email,
+  ) {
+    // Check email in use
+    const existedUser = await this.userService.findByEmail(email);
+    if (existedUser) {
+      if (existedUser.status === UserStatus.Registered) {
+        throw new BadRequestException(
+          'User already registered, please validate email',
+        );
+      }
+      throw new BadRequestException('Email is already in use');
+    }
+
+    // Create user
+    const user = await this.userService.create(email, password);
+    await user.save();
+
+    const baseResult = {
+      id: user._id.toString(),
+      email: user.email,
+      verificationMethod,
+    };
+
+    // Send verification based on method
+    if (verificationMethod === VerificationMethod.OTP) {
+      const token = await this.sendOtpEmail(user._id.toString(), email);
+
+      return {
+        ...baseResult,
+        otpCode: token,
+      };
+    } else {
+      const token = await this.sendValidationEmail(user._id.toString(), email);
+
+      return {
+        ...baseResult,
+        confirmationToken: token,
+      };
+    }
+  }
+
+  async confirmOtp(userId: string, otp: string) {
+    // Verify OTP
+    const isValid = await this.userService.verifyOTP(userId, otp);
+    if (!isValid) {
+      throw new BadRequestException('Invalid or expired OTP');
+    }
+
+    // Find user
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Activate user
+    user.status = UserStatus.Active;
+    await user.save();
+
+    // Clear OTP
+    await this.userService.clearOTP(userId);
+
+    // Create Stripe customer
+    await this.stripeService.createStripeCustomer(user, {
+      name: user.firstName,
+      phone: user.phoneNumber,
+    });
+
+    // Return signin token
+    return this.signin(user);
+  }
+
+  async resendOtp(userId: string, email: string) {
+    // Find user
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Verify email matches the user
+    if (user.email !== email) {
+      throw new BadRequestException('Email does not match user record');
+    }
+
+    // Only allow resending OTP for users who are not yet active
+    if (user.status === UserStatus.Active) {
+      throw new BadRequestException('User is already active');
+    }
+
+    // Increment and check the OTP resend count
+    const resendInfo = await this.userService.incrementOtpResendCount(userId);
+
+    // Clear any existing OTP
+    await this.userService.clearOTP(userId);
+
+    // Generate and send new OTP
+    const otp = await this.sendOtpEmail(userId, email);
+
+    return {
+      userId,
+      email,
+      // In development you might want to return the OTP, but remove this in production
+      otpCode: otp,
+      // Return resend count information
+      resendCount: resendInfo.count,
+      resendLimit: 5,
+      resetDate: resendInfo.resetDate,
+    };
+  }
+
+  signin(user: Partial<UserDocument>) {
+    const payload = {
+      email: user.email,
+      sub: user._id,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatarUrl: user.avatarUrl,
+    };
+    return {
+      accessToken: this.jwtService.sign(payload),
+      userId: user._id,
+    };
+  }
+
+  async validateUser(email: string, password: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const isValid = await comparePasswordHelper(password, user.password);
+
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    if (user.status !== UserStatus.Active) {
+      throw new UnauthorizedException('User is not active');
+    }
+
+    return user;
+  }
+
+  async validateGoogleUser(googleUser: CreateUserDto) {
+    const user = await this.userService.findByEmail(googleUser.email);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    if (user) return user;
+    return await this.userService.create(googleUser.email, googleUser.password);
+  }
+
+  async validateUserById(id: string) {
+    const user = await this.userService.findById(id);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (user.status !== UserStatus.Active) {
+      throw new UnauthorizedException('User is not active');
+    }
+
+    return user;
+  }
+
+  async validateEmail(email: string) {
+    const user = await this.userService.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    user.status = UserStatus.Active;
+    await user.save();
+
+    // Create Stripe customer
+    await this.stripeService.createStripeCustomer(user, {
+      name: user.firstName,
+      phone: user.phoneNumber,
+    });
+
+    // Send a JWT token for the user to immediately sign in
+    return this.signin(user);
+  }
+
+  decodeConfirmationToken(token: string) {
+    try {
+      const payload = this.jwtService.verify<ConfirmToken>(token, {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+      });
+
+      if (typeof payload === 'object' && 'email' in payload) {
+        return payload.email;
+      }
+      throw new BadRequestException();
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (error?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Email confirmation token expired');
+      }
+      throw new BadRequestException('Bad confirmation token');
+    }
+  }
+
+  async sendResetPasswordEmail(id: string, email: string) {
+    const token = this.jwtService.sign(
+      { email, sub: id },
+      {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+        expiresIn: '1h',
+      },
+    );
+    const url = `${this.configService.get('EMAIL_CONFIRMATION_URL')}/reset-password?token=${token}`;
+
+    await this.mailService.sendResetPasswordEmail({
+      to: email,
+      data: { name: email, resetLink: url },
+    });
+
+    return token;
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Check user status
+    if (user.status !== UserStatus.Active) {
+      throw new BadRequestException('User is not active');
+    }
+
+    // Send reset password email
+    const token = await this.sendResetPasswordEmail(user._id.toString(), email);
+
+    return {
+      message: 'Password reset email sent',
+      // TODO: remove this in production
+      resetToken: token,
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get('JWT_VERIFY_SECRET'),
+      });
+
+      const user = await this.userService.findByEmail(payload.email);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      // Update password
+      await this.userService.resetPassword(user._id.toString(), newPassword);
+
+      return {
+        message: 'Password reset successful',
+      };
+    } catch (error) {
+      if (error?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Reset password token expired');
+      }
+      throw new BadRequestException('Invalid reset password token');
+    }
+  }
+}

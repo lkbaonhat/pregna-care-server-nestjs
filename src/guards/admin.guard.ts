@@ -1,13 +1,26 @@
-import { CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { Reflector } from '@nestjs/core';
+import { UserRoles } from 'src/users/types/user-status';
+import { AppRequest } from 'src/types/core';
 
+@Injectable()
 export class AdminGuard implements CanActivate {
-  canActivate(context: ExecutionContext) {
-    const request = context.switchToHttp().getRequest();
+  constructor(private reflector: Reflector) {}
 
-    if (!request.currentUser) {
-      return false;
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request: AppRequest = context.switchToHttp().getRequest();
+    const user = request.user;
+    if (!user) {
+      throw new UnauthorizedException('User not found');
     }
-
-    return request.currentUser.isAdmin;
+    return user.role === UserRoles.Admin;
   }
 }
